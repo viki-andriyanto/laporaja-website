@@ -1,28 +1,20 @@
-import './App.css'
+import { BrowserRouter, Router, Routes } from "react-router"
 
 function App() {
 
   return (
-    <Router>
-      <div>
-        {/* {NAVBAR} BERISI KODE UNTUK NAVBAR */}
-
-        {/* {ROUTING} BERISI KODE UNTUK ROUTE*/}
-
-
-        {/* {FOOTER} BERISI KODE MEMANGGIL ROUTE*/}
-        {/* CONTOH 
-          <footer />*/}
-
-        {/* {MODAL LOGIN} BERISI KODE UNTUK LOGIN*/}
-
-
-        {/* {MODAL REGISTER} BERISI KODE UNTUK REGISTER*/}
-
-
-      </div>
-    </Router>  
-  );
+  <>
+    <div>
+      <BrowserRouter>
+        <Routes>
+          <Router>
+            
+          </Router>
+        </Routes>
+      </BrowserRouter>
+    </div>
+  </>
+  )
 };
 
 export default App
