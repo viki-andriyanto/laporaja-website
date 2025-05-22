@@ -1,19 +1,21 @@
-import { BrowserRouter, Router, Routes } from "react-router"
+import { BrowserRouter, Route, Router, Routes } from "react-router"
+import Dashboard from "./pages/Dashboard"
 
 function App() {
 
   return (
-  <>
-    <div>
-      <BrowserRouter>
-        <Routes>
-          <Router>
-            
-          </Router>
-        </Routes>
-      </BrowserRouter>
-    </div>
-  </>
+    <>
+      <div className="container">
+        <BrowserRouter>
+          <Routes>
+            <Route index element={<Dashboard />} />
+            {/* <Route path="/" element={<Books />} />
+            <Route path="/" element={<Contact />} />
+            <Route path="/" element={<Team />} /> */}
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </>
   )
 };
 
