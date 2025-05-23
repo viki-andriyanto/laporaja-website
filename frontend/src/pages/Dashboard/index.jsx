@@ -2,6 +2,7 @@ import Footer from "../../shared/footer";
 import Header from "../../shared/header";
 
 export default function Dashboard() {
+
     return (
         <>
             <Header />
@@ -28,7 +29,7 @@ export default function Dashboard() {
                 </p>
             </div>
             <div className="col-lg-6 text-center">
-                <img src="../src/assets/hero-ilustrasi.png" alt="Ilustrasi" className="img-fluid mt-4 mt-lg-0" />
+                <img src="../src/assets/illustrasi.png" alt="Ilustrasi" className="img-fluid mt-4 mt-lg-0" />
             </div>
             </div>
         </section>
@@ -38,7 +39,7 @@ export default function Dashboard() {
             <div className="container">
             <div className="row align-items-center">
                 <div className="col-lg-6">
-                <img src="../src/assets/diagram-kerja.png" alt="Cara Kerja" className="img-fluid" />
+                <img src="../src/assets/cara-kerja.png" alt="Cara Kerja" className="img-fluid" />
                 </div>
                 <div className="col-lg-6">
                 <h3 className="fw-bold mb-4">Cara Kerja</h3>
@@ -54,7 +55,7 @@ export default function Dashboard() {
             </div>
         </section>
 
-        {/* Testimonial Section */}
+         {/* Testimonial Section */}
         <section id="testimonial" className="py-5" style={{ background: 'linear-gradient(to bottom, #3B82F6, #ebf8e1)' }}>
             <div className="container text-center">
             <h3 className="fw-bold mb-5 text-white">Testimonial</h3>
@@ -120,7 +121,9 @@ export default function Dashboard() {
             </div>
         </section>
 
-            <Footer />
-        </>
+
+        <Footer />
+
+      </>
     )
 }
