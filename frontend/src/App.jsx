@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Router, Routes } from "react-router"
 import Dashboard from "./pages/Dashboard"
 
+import Lapor from "./pages/Lapor"
+
 function App() {
 
   return (
@@ -9,9 +11,8 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route index element={<Dashboard />} />
-            {/* <Route path="/" element={<Books />} />
-            <Route path="/" element={<Contact />} />
-            <Route path="/" element={<Team />} /> */}
+            <Route path="/Lapor" element={<Lapor />} />
+            
           </Routes>
         </BrowserRouter>
       </div>
