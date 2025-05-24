@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard/index";
 import KelolaLaporan from "./pages/Kelola-Laporan";
 import Lapor from "./pages/Lapor";
 import RiwayatUser from "./pages/Riwayat-User"
+import AuthPage from "./pages/Login/index.jsx";
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
             <Route path="/kelola-laporan" element={<KelolaLaporan />} />
             <Route path="/lapor" element={<Lapor />} />
             <Route path="/riwayat-user" element={<RiwayatUser />} />
+            <Route path="/login" element={<AuthPage />} /> 
           </Routes>
         </BrowserRouter>
       </div>

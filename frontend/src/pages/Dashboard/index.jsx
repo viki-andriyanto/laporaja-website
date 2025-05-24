@@ -5,7 +5,7 @@ export default function Dashboard() {
 
     return (
         <>
-            <Header />
+        <Header />
 
         {/* Hero Section */}
         <header className="bg-primary text-white text-center py-5">
