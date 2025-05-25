@@ -12,7 +12,7 @@ export default function Dashboard() {
             <div className="container">
             <h1 className="display-5 fw-bold">Layanan Aspirasi dan Pengaduan Online Rakyat</h1>
             <p className="lead mt-3">Sampaikan laporan Anda langsung kepada instansi pemerintah berwenang.</p>
-            <a href="#lapor" className="btn btn-success btn-lg mt-">Lapor</a>
+            <a href="/lapor" className="btn btn-success btn-lg mt-">Lapor</a>
             </div>
         </header>
 

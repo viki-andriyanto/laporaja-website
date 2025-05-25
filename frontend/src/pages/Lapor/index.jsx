@@ -52,7 +52,6 @@ export default function Lapor() {
                                     <div className="invalid-feedback">Silakan pilih kategori yang valid.</div>
                                 </div>
 
-
                                 <div className="col-12">
                                     <label htmlFor="lokasi" className="form-label">
                                         Lokasi Kejadian*
