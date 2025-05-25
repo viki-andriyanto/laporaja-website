@@ -1,7 +1,9 @@
 import Footer from "../../shared/footer";
 import Header from "../../shared/header";
+import { useNavigate } from "react-router-dom";
 
 export default function Lapor() {
+    const navigate = useNavigate();
     return (
         <>
             <Header />
@@ -50,7 +52,6 @@ export default function Lapor() {
                                     <div className="invalid-feedback">Silakan pilih kategori yang valid.</div>
                                 </div>
 
-
                                 <div className="col-12">
                                     <label htmlFor="lokasi" className="form-label">
                                         Lokasi Kejadian*
@@ -96,14 +97,15 @@ export default function Lapor() {
                                 <button className="col-8 btn btn-primary btn-lg w-50" type="submit">
                                     Kirim Laporan
                                 </button>
-                                <button className="col-4 btn btn-outline-dark btn-lg w-50 " type="submit">
+                                <button
+                                    className="col-4 btn btn-outline-dark btn-lg w-50"
+                                    type="button"
+                                    onClick={() => navigate("/riwayat-user")}>
                                     Lihat Riwayat Laporan
                                 </button>
                             </div>
-
                         </form>
                     </div>
-
                 </main>
             </div>
             <Footer />

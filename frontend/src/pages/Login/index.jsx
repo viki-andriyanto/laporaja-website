@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom'; // Import hook
 import backgroundImage from '../../assets/background.png';
 import logoImage from '../../assets/logo.png';
 
 const AuthPage = () => {
+  const [searchParams] = useSearchParams();
   const [currentView, setCurrentView] = useState('login');
+
+  // Baca parameter "view" dari URL saat komponen dimuat
+  useEffect(() => {
+    const view = searchParams.get('view') || 'login';
+    setCurrentView(view);
+  }, [searchParams]);
+
   const [formData, setFormData] = useState({
-    nik: '',
-    password: '',
-    namalengkap: '',
-    noTelepon: '',
-    email: ''
+  nik: '',
+  password: '',
+  namalengkap: '',
+  noTelepon: '',
+  email: ''
   });
 
   const handleInputChange = (e) => {
@@ -42,6 +51,7 @@ const AuthPage = () => {
             {currentView === 'login' ? 'Log in' : 'Register'}
           </h4>
           <form onSubmit={handleSubmit}>
+            {/* Input NIK - Max 16 karakter */}
             <div style={{ marginBottom: 10 }}>
               <input
                 type="text"
@@ -50,6 +60,8 @@ const AuthPage = () => {
                 value={formData.nik}
                 onChange={handleInputChange}
                 style={inputStyle}
+                maxLength={16}
+                inputMode='numeric'
               />
             </div>
             {currentView === 'register' && (
@@ -64,18 +76,22 @@ const AuthPage = () => {
                     style={inputStyle}
                   />
                 </div>
+                {/* Input No Telepon - Max 12 karakter */}
                 <div style={{ marginBottom: 10 }}>
                   <input
-                    type="text"
+                    type="tel"
                     name="noTelepon"
-                    placeholder="No Telepon"
+                    placeholder="No Telepon diawali (08)"
                     value={formData.noTelepon}
                     onChange={handleInputChange}
                     style={inputStyle}
+                    maxLength={12}
+                    inputMode='numeric'
                   />
                 </div>
               </>
             )}
+            {/* Input Password - Max 12 karakter */}
             <div style={{ marginBottom: 10 }}>
               <input
                 type="password"
@@ -84,12 +100,14 @@ const AuthPage = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 style={inputStyle}
+                maxLength={12}
               />
             </div>
             <button type="submit" style={buttonStyle}>
               {currentView === 'login' ? 'Masuk' : 'Daftar'}
             </button>
           </form>
+
           <div style={{ textAlign: 'center', marginTop: 10 }}>
             <hr style={{ margin: '20px 0' }} />
             {currentView === 'login' ? (

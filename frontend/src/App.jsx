@@ -1,25 +1,25 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard/index";
-import KelolaLaporan from "./pages/admin/KelolaLaporan.jsx";
-// import Admin from "./pages/admin/index" // Uncomment jika ingin digunakan
+import Lapor from "./pages/Lapor";
+import RiwayatUser from "./pages/Riwayat-User"
+import AuthPage from "./pages/Login/index.jsx";
 
 function App() {
+
   return (
     <>
       <div className="container">
         <BrowserRouter>
           <Routes>
             <Route index element={<Dashboard />} />
-            {/* <Route path="/admin" element={<Admin />} /> */}
-            <Route path="/admin/kelola-laporan" element={<KelolaLaporan />} />
-            {/* <Route path="/books" element={<Books />} /> */}
-            {/* <Route path="/contact" element={<Contact />} /> */}
-            {/* <Route path="/team" element={<Team />} /> */}
+            <Route path="/lapor" element={<Lapor />} />
+            <Route path="/riwayat-user" element={<RiwayatUser />} />
+            <Route path="/login" element={<AuthPage />} /> 
           </Routes>
         </BrowserRouter>
       </div>
     </>
-  );
-}
+  )
+};
 
-export default App;
+export default App

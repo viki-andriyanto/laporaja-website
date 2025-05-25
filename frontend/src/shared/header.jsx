@@ -1,28 +1,80 @@
+import { Link } from 'react-router-dom';
+
 export default function Header() {
+    const handleScroll = (id) => {
+    const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <div className="container">
             <header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-
-                <a href="/" className="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none" style={{ fontstyle: 'inter' }}>
+                {/* Perbaikan path gambar */}
+                <Link to="/" className="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
                     <img
-                        src={"src/assets/logo.png"}
-                        alt=""
+                        src="../src/assets/logo.png" // Path absolut ke public/assets
+                        alt="Logo"
                         style={{ height: '30px', objectFit: 'contain' }}
                         className="me-2"
                     />
-                </a>
+                </Link>
 
                 <ul className="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-                    <li><a href="#" className="nav-link px-2 link-dark">Beranda</a></li>
-                    <li><a href="#" className="nav-link px-2 link-dark">Cara Kerja</a></li>
-                    <li><a href="#" className="nav-link px-2 link-dark">Testimonial</a></li>
-                    <li><a href="/lapor" className="nav-link px-2 link-dark">Lapor</a></li>
+                    <li>
+                        <Link 
+                            to="/" 
+                            className="nav-link px-2 link-dark"
+                            onClick={() => {
+                                if (window.location.pathname === '/') {
+                                    window.location.reload();
+                                }
+                            }}
+                        >
+                            Beranda
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            to="#"
+                            className="nav-link px-2 link-dark"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleScroll('caraKerja');
+                            }}
+                        >
+                            Cara Kerja
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            to="#"
+                            className="nav-link px-2 link-dark"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleScroll('testimonial');
+                            }}
+                        >
+                            Testimonial
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/lapor" className="nav-link px-2 link-dark">
+                            Lapor
+                        </Link>
+                    </li>
                 </ul>
 
                 <div className="col-md-3 text-end">
-                    <button type="button" className="btn btn-outline-primary me-3 rounded-pill">Masuk</button>
-                    <button type="button" className="btn btn-primary rounded-pill">Daftar</button>
+                <Link to="/login?view=login" className="btn btn-outline-primary me-3 rounded-pill">
+                Masuk
+                </Link> 
+                <Link to="/login?view=register" className="btn btn-primary rounded-pill">
+                Daftar
+                </Link>
                 </div>
+                
             </header>
         </div>
 
