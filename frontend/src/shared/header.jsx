@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
+import { Dropdown } from 'react-bootstrap';
 
 export default function Header() {
     const handleScroll = (id) => {
-    const element = document.getElementById(id);
+        const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
         }
@@ -11,10 +12,9 @@ export default function Header() {
     return (
         <div className="container">
             <header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-                {/* Perbaikan path gambar */}
                 <Link to="/" className="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
                     <img
-                        src="../src/assets/logo.png" // Path absolut ke public/assets
+                        src="../src/assets/logo.png"
                         alt="Logo"
                         style={{ height: '30px', objectFit: 'contain' }}
                         className="me-2"
@@ -59,24 +59,35 @@ export default function Header() {
                             Testimonial
                         </Link>
                     </li>
+
+                    {/* Dropdown */}
                     <li>
-                        <Link to="/lapor" className="nav-link px-2 link-dark">
-                            Lapor
-                        </Link>
+                        <Dropdown>
+                            <Dropdown.Toggle variant="light" id="dropdown-basic" className="nav-link px-2 link-dark border-0">
+                                Lapor
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu>
+                                <Dropdown.Item as={Link} to="/admin/Kelola-laporan">
+                                    Kelola Laporan
+                                </Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/admin/Riwayat-Admin">
+                                    Riwayat Laporan
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </li>
                 </ul>
 
                 <div className="col-md-3 text-end">
-                <Link to="/login?view=login" className="btn btn-outline-primary me-3 rounded-pill">
-                Masuk
-                </Link> 
-                <Link to="/login?view=register" className="btn btn-primary rounded-pill">
-                Daftar
-                </Link>
+                    <Link to="/login?view=login" className="btn btn-outline-primary me-3 rounded-pill">
+                        Masuk
+                    </Link> 
+                    <Link to="/login?view=register" className="btn btn-primary rounded-pill">
+                        Daftar
+                    </Link>
                 </div>
-                
             </header>
         </div>
-
-    )
+    );
 }
