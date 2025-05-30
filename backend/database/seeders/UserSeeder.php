@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
             'nama_lengkap' => 'customer',
             'no_telepon' => '1234567890',
             'password' => bcrypt('12345678'),
-            'role' => 'customer'
+            'role' => 'user'
         ]);
     }
 }
