@@ -47,16 +47,16 @@ export default function Footer() {
                     <h5 className="fw-bold text-dark mb-3">Useful Links</h5>
                     <ul className="list-unstyled">
                         <li className="mb-2">
-                            <a href="#" className="text-decoration-none text-muted">Beranda</a>
+                            <a href="/" className="text-decoration-none text-muted">Beranda</a>
                         </li>
                         <li className="mb-2">
-                            <a href="#" className="text-decoration-none text-muted">Cara Kerja</a>
+                            <a href="#caraKerja" className="text-decoration-none text-muted">Cara Kerja</a>
                         </li>
                         <li className="mb-2">
-                            <a href="#" className="text-decoration-none text-muted">Testimonial</a>
+                            <a href="#testimonial" className="text-decoration-none text-muted">Testimonial</a>
                         </li>
                         <li className="mb-2">
-                            <a href="#" className="text-decoration-none text-muted">Lapor</a>
+                            <a href="/lapor" className="text-decoration-none text-muted">Lapor</a>
                         </li>
                     </ul>
                 </div>
@@ -72,7 +72,7 @@ export default function Footer() {
                         </div>
                         <div>
                             <p className="text-muted mb-0 small">Phone No:</p>
-                            <p className="text-dark mb-0 small fw-medium">+1 (109) -1812-347</p>
+                            <p className="text-dark mb-0 small fw-medium">(+62) 812-3456-7890</p>
                         </div>
                     </div>
 
@@ -83,7 +83,7 @@ export default function Footer() {
                         </div>
                         <div>
                             <p className="text-muted mb-0 small">Email Address:</p>
-                            <p className="text-dark mb-0 small fw-medium">business@domain.com</p>
+                            <p className="text-dark mb-0 small fw-medium">Laporaja@govern.com</p>
                         </div>
                     </div>
 
@@ -94,7 +94,7 @@ export default function Footer() {
                         </div>
                         <div>
                             <p className="text-dark mb-0 small fw-medium">
-                                1217 new Town, 245x Town 1214 Street, United State
+                                Jl. Pematang Sawah No. 17, Desa Sukamaju, Kecamatan Cibiru, 40393 Rural District, Indonesia
                             </p>
                         </div>
                     </div>

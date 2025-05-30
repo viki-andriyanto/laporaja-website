@@ -68,10 +68,10 @@ export default function Header() {
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-                                <Dropdown.Item as={Link} to="/admin/Kelola-laporan">
-                                    Kelola Laporan
+                                <Dropdown.Item as={Link} to="/lapor">
+                                    Buat Laporan
                                 </Dropdown.Item>
-                                <Dropdown.Item as={Link} to="/admin/Riwayat-Admin">
+                                <Dropdown.Item as={Link} to="/Riwayat-User">
                                     Riwayat Laporan
                                 </Dropdown.Item>
                             </Dropdown.Menu>
