@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Table, Button, Row, Col, Form, InputGroup, Card, Badge } from 'react-bootstrap';
+import { Container, Button, Row, Col, Form, Card, Badge, Modal } from 'react-bootstrap';
 import Header from "../../shared/header";
 import Footer from "../../shared/footer";
 
@@ -17,13 +17,13 @@ const reportsData = [
         hasMedia: true,
     },
     {
-        id: "RPT-2024-001",
-        title: "Jalan Rusak di Depan Sekolah",
+        id: "RPT-2024-002",
+        title: "Sampah Menumpuk di Taman",
         category: "lingkungan",
-        location: "Jl. Sudirman No. 123, Jakarta",
+        location: "Taman Kota Blok M, Jakarta",
         description:
-            "Terdapat lubang besar di jalan yang sangat berbahaya bagi pengendara motor. Sudah beberapa kali terjadi kecelakaan di lokasi ini.",
-        date: "2024-05-20",
+            "Tumpukan sampah yang mengganggu pemandangan dan menimbulkan bau tak sedap. Diperlukan tindakan pembersihan segera.",
+        date: "2024-05-21",
         status: "pending",
         hasMedia: true,
     },
@@ -48,7 +48,12 @@ export default function RiwayatUser() {
     const [categoryFilter, setCategoryFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [filteredReports, setFilteredReports] = useState(reportsData);
+    
+    // Modal
+    const [showModal, setShowModal] = useState(false);
+    const [selectedReport, setSelectedReport] = useState(null);
 
+    // Filter
     useEffect(() => {
         const filtered = reportsData.filter((report) => {
             const matchesSearch =
@@ -91,6 +96,16 @@ export default function RiwayatUser() {
             month: "long",
             day: "numeric",
         });
+
+    const handleCardClick = (report) => {
+        setSelectedReport(report);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedReport(null);
+    };
 
     return (
         <>
@@ -157,7 +172,7 @@ export default function RiwayatUser() {
                     ) : (
                         filteredReports.map((report) => (
                             <Col md={6} lg={4} key={report.id} className="mb-4">
-                                <Card onClick={() => alert(`Detail laporan: ${report.title}`)}>
+                                <Card onClick={() => handleCardClick(report)} style={{ cursor: "pointer" }}>
                                     <Card.Header className="bg-primary text-white">
                                         <small>{report.id}</small>
                                         <h5 className="mt-2">{report.title}</h5>
@@ -181,11 +196,31 @@ export default function RiwayatUser() {
                 </Row>
             </Container>
 
+            {/* Modal Detail Laporan */}
+            {selectedReport && (
+                <Modal show={showModal} onHide={handleCloseModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{selectedReport.title}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p><strong>ID Laporan:</strong> {selectedReport.id}</p>
+                        <p><strong>Tanggal:</strong> {formatDate(selectedReport.date)}</p>
+                        <p><strong>Kategori:</strong> {categoryLabels[selectedReport.category]}</p>
+                        <p><strong>Lokasi:</strong> {selectedReport.location}</p>
+                        <p><strong>Deskripsi:</strong><br />{selectedReport.description}</p>
+                        <p><strong>Status:</strong> {statusLabels[selectedReport.status]}</p>
+                        {selectedReport.hasMedia && (
+                            <p><strong>Media:</strong> 📎 Ada media terkait</p>
+                        )}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseModal}>
+                            Tutup
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            )}
             <Footer />
         </>
-
     );
-
 }
-
-
