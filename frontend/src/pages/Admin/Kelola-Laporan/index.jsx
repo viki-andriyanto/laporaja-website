@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { Table, Button, Modal, Form, Badge, Container, Row, Col } from "react-bootstrap";
+import Header from "../../../shared/header";
 
+// Data dummy
 const laporanDummy = [
   {
     id: 1,
@@ -24,111 +27,119 @@ const laporanDummy = [
   },
 ];
 
-const getStatusStyle = (status) => {
+const getStatusBadge = (status) => {
   switch (status) {
     case "SELESAI":
-      return "bg-[#6FCF97] text-white font-bold px-3 py-1 rounded-md text-sm";
+      return <Badge bg="success">SELESAI</Badge>;
     case "PERLU DITINJAU":
-      return "bg-[#F2C94C] text-black font-bold px-3 py-1 rounded-md text-sm";
+      return <Badge bg="warning" text="dark">PERLU DITINJAU</Badge>;
     case "DITOLAK":
-      return "bg-[#EB5757] text-white font-bold px-3 py-1 rounded-md text-sm";
+      return <Badge bg="danger">DITOLAK</Badge>;
     default:
-      return "bg-gray-200 text-black px-3 py-1 rounded-md text-sm";
+      return <Badge bg="secondary">{status}</Badge>;
   }
 };
 
-const ModalDetailLaporan = ({ laporan, onClose }) => {
-  if (!laporan) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-gray-100 rounded-lg w-full max-w-md p-6 shadow-lg relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-700 text-xl"
-        >
-          &times;
-        </button>
-        <h2 className="text-xl font-semibold mb-2">Detail Laporan</h2>
-        <p className="font-semibold text-gray-700 mb-1">{laporan.isi}</p>
-        <div className="border border-gray-400 rounded p-3 h-40 overflow-y-auto bg-white">
-          isi laporan
-        </div>
-        <div className="flex justify-end space-x-2 mt-4">
-          <button className="bg-red-300 hover:bg-red-400 text-white px-4 py-1 rounded">
-            Tolak Laporan
-          </button>
-          <button className="bg-green-400 hover:bg-green-500 text-white px-4 py-1 rounded">
-            Selesaikan
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+const ModalDetailLaporan = ({ show, laporan, onHide }) => (
+  <Modal show={show} onHide={onHide} centered>
+    <Modal.Header closeButton>
+      <Modal.Title>Detail Laporan</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <h5>{laporan?.isi}</h5>
+      <p className="text-muted mb-2">Tanggal: {laporan?.tanggal}</p>
+      <Form.Group className="mb-3">
+        <Form.Label>Isi Laporan</Form.Label>
+        <Form.Control as="textarea" rows={3} value="isi laporan" readOnly />
+      </Form.Group>
+    </Modal.Body>
+    <Modal.Footer>
+      <Button variant="danger">Tolak Laporan</Button>
+      <Button variant="success">Selesaikan</Button>
+    </Modal.Footer>
+  </Modal>
+);
 
 const KelolaLaporan = () => {
   const [selectedLaporan, setSelectedLaporan] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleShowModal = (laporan) => {
+    setSelectedLaporan(laporan);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedLaporan(null);
+    setShowModal(false);
+  };
 
   return (
-    <div className="p-6 bg-white font-poppins">
-      <h2 className="text-xl font-semibold mb-4">Kelola Laporan</h2>
-      <div className="overflow-x-auto border border-blue-400 rounded-lg">
-        <table className="min-w-full border-collapse text-sm text-center">
-          <thead>
-            <tr className="bg-[#00BFF9] text-white">
-              <th className="py-2 px-4 border">Tanggal</th>
-              <th className="py-2 px-4 border">Judul Laporan</th>
-              <th className="py-2 px-4 border">Status</th>
-              <th className="py-2 px-4 border">Komentar</th>
-              <th className="py-2 px-4 border">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {laporanDummy.map((laporan) => (
-              <tr key={laporan.id} className="border-t">
-                <td className="py-2 px-4 border">{laporan.tanggal}</td>
-                <td className="py-2 px-4 border">{laporan.isi}</td>
-                <td className="py-2 px-4 border">
-                  <span className={getStatusStyle(laporan.status)}>
-                    {laporan.status}
-                  </span>
-                </td>
-                <td className="py-2 px-4 border">{laporan.komentar}</td>
-                <td className="py-2 px-4 border space-x-2">
-                  <button
-                    title="Detail"
-                    onClick={() => setSelectedLaporan(laporan)}
-                    className="bg-white border border-gray-300 rounded p-1 hover:bg-gray-100"
-                  >
-                    🔍
-                  </button>
-                  <button
-                    title="Selesaikan"
-                    className="bg-white border border-gray-300 rounded p-1 hover:bg-gray-100"
-                  >
-                    ✅
-                  </button>
-                  <button
-                    title="Tolak"
-                    className="bg-white border border-gray-300 rounded p-1 hover:bg-gray-100"
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <>
+      <Header />
+      <Container className="py-4">
+        <Row className="mb-4">
+          <Col>
+            <h2>Kelola Laporan</h2>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Table bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Judul Laporan</th>
+                  <th>Status</th>
+                  <th>Komentar</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {laporanDummy.map((laporan) => (
+                  <tr key={laporan.id}>
+                    <td>{laporan.tanggal}</td>
+                    <td>{laporan.isi}</td>
+                    <td>{getStatusBadge(laporan.status)}</td>
+                    <td>
+                      <Form.Control type="text" placeholder="Komentar..." />
+                    </td>
+                    <td>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => handleShowModal(laporan)}
+                        title="Detail"
+                      >
+                        🔍
+                      </Button>
+                      <Button variant="outline-success" size="sm" className="me-1" title="Selesaikan">
+                        ✅
+                      </Button>
+                      <Button variant="outline-danger" size="sm" title="Tolak">
+                        🗑️
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+        <Row>
+          <Col className="text-center">
+            <Button variant="outline-secondary">Kembali</Button>
+          </Col>
+        </Row>
 
-      {selectedLaporan && (
         <ModalDetailLaporan
+          show={showModal}
           laporan={selectedLaporan}
-          onClose={() => setSelectedLaporan(null)}
+          onHide={handleCloseModal}
         />
-      )}
-    </div>
+      </Container>
+    </>
   );
 };
 
