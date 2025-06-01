@@ -7,7 +7,9 @@ export default function Dashboard() {
       <Header />
 
       {/* Hero Section */}
-      <header className="bg-primary text-white text-center py-5">
+      <header className="bg-primary text-white text-center py-5" style={{
+        background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)"
+      }}>
         <div className="container">
           <h1 className="display-6 fw-bold">
             Satu Pintu Aspirasi dan Pengaduan Masyarakat
@@ -88,7 +90,7 @@ export default function Dashboard() {
         id="testimonial"
         className="py-5"
         style={{ background: "linear-gradient(to bottom, #3B82F6, #ebf8e1)" }}
-      >
+      > 
         <div className="container text-center">
           <h3 className="fw-bold mb-5 text-white">Testimonial</h3>
           <div className="row justify-content-center">

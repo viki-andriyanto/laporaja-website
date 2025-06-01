@@ -5,19 +5,20 @@ export default function Footer() {
                 {/* Logo dan Deskripsi */}
                 <div className="col-md-5 mb-4">
                     <a href="/" className="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none"
-                        style={{ fontstyle: 'inter' }}>
+                        style={{ fontStyle: 'inter' }}>
                         <img
                             src={"src/assets/logo.png"}
-                            alt=""
+                            alt="Logo"
                             style={{ height: '30px', objectFit: 'contain' }}
                             className="mb-4"
                         />
                     </a>
-                    <p className="text-dark">Sistem Pelayanan Terpadu untuk Menyampaikan Aspirasi, Masukan,
-                        serta Pengaduan dari Masyarakat ke perangkat Desa
+                    <p className="text-dark">
+                        Sistem Pelayanan Terpadu untuk menyampaikan aspirasi, masukan,
+                        serta pengaduan dari masyarakat kepada perangkat desa.
                     </p>
 
-                    {/* Social Media Links */}
+                    {/* Tautan Sosial Media */}
                     <div className="d-flex my-4">
                         <ul className="list-unstyled d-flex gap-3 m-0 p-0">
                             <li>
@@ -32,19 +33,18 @@ export default function Footer() {
                         </ul>
                     </div>
 
-
-                    {/* Copyright */}
+                    {/* Hak Cipta */}
                     <p className="text-muted small">
-                        Copyright © 2025, Laporaja
+                        Hak Cipta © 2025, Laporaja
                     </p>
                 </div>
 
                 {/* Spacer */}
                 <div className="col-md-1"></div>
 
-                {/* Useful Links */}
+                {/* Tautan Berguna */}
                 <div className="col-md-3 mb-4">
-                    <h5 className="fw-bold text-dark mb-3">Useful Links</h5>
+                    <h5 className="fw-bold text-dark mb-3">Tautan Berguna</h5>
                     <ul className="list-unstyled">
                         <li className="mb-2">
                             <a href="/" className="text-decoration-none text-muted">Beranda</a>
@@ -53,7 +53,7 @@ export default function Footer() {
                             <a href="#caraKerja" className="text-decoration-none text-muted">Cara Kerja</a>
                         </li>
                         <li className="mb-2">
-                            <a href="#testimonial" className="text-decoration-none text-muted">Testimonial</a>
+                            <a href="#testimonial" className="text-decoration-none text-muted">Testimoni</a>
                         </li>
                         <li className="mb-2">
                             <a href="/lapor" className="text-decoration-none text-muted">Lapor</a>
@@ -61,17 +61,17 @@ export default function Footer() {
                     </ul>
                 </div>
 
-                {/* Contact Us */}
+                {/* Hubungi Kami */}
                 <div className="col-md-3 mb-4">
-                    <h5 className="fw-bold text-dark mb-3">Contact Us</h5>
+                    <h5 className="fw-bold text-dark mb-3">Hubungi Kami</h5>
 
-                    {/* Phone */}
+                    {/* Telepon */}
                     <div className="d-flex align-items-start mb-3">
                         <div className="rounded-circle bg-light p-2 me-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                            <i class="fa-solid fa-phone"></i>
+                            <i className="fa-solid fa-phone"></i>
                         </div>
                         <div>
-                            <p className="text-muted mb-0 small">Phone No:</p>
+                            <p className="text-muted mb-0 small">No. Telepon:</p>
                             <p className="text-dark mb-0 small fw-medium">(+62) 812-3456-7890</p>
                         </div>
                     </div>
@@ -79,27 +79,28 @@ export default function Footer() {
                     {/* Email */}
                     <div className="d-flex align-items-start mb-3">
                         <div className="rounded-circle bg-light p-2 me-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                            <i class="fa-solid fa-envelope"></i>
+                            <i className="fa-solid fa-envelope"></i>
                         </div>
                         <div>
-                            <p className="text-muted mb-0 small">Email Address:</p>
-                            <p className="text-dark mb-0 small fw-medium">Laporaja@govern.com</p>
+                            <p className="text-muted mb-0 small">Alamat Email:</p>
+                            <p className="text-dark mb-0 small fw-medium">laporaja@govern.com</p>
                         </div>
                     </div>
 
-                    {/* Address */}
+                    {/* Alamat */}
                     <div className="d-flex align-items-start">
                         <div className="rounded-circle bg-light p-2 me-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                            <i class="fa-solid fa-location-dot"></i>
+                            <i className="fa-solid fa-location-dot"></i>
                         </div>
                         <div>
-                            <p className="text-dark mb-0 small fw-medium">
-                                Jl. Pematang Sawah No. 17, Desa Sukamaju, Kecamatan Cibiru, 40393 Rural District, Indonesia
-                            </p>
+                            <p className="text-dark mb-0 small fw-medium">Jl. Pematang Sawah No. 17</p>
+                            <p className="text-dark mb-0 small fw-medium">Desa Sukamaju, Kec. Cibiru</p>
+                            <p className="text-dark mb-0 small fw-medium">Kab. Bandung, 40393</p>
+                            <p className="text-dark mb-0 small fw-medium">Indonesia</p>
                         </div>
                     </div>
                 </div>
             </footer>
         </div>
-    )
+    );
 }

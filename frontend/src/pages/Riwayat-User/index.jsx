@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Button, Row, Col, Form, Card, Badge, Modal } from 'react-bootstrap';
 import Header from "../../shared/header";
 import Footer from "../../shared/footer";
+import { useNavigate } from "react-router";
 
 // Data Dummy
 const reportsData = [
@@ -13,7 +14,7 @@ const reportsData = [
         description:
             "Terdapat lubang besar di jalan yang sangat berbahaya bagi pengendara motor. Sudah beberapa kali terjadi kecelakaan di lokasi ini.",
         date: "2024-05-20",
-        status: "progress",
+        status: "completed",
         hasMedia: true,
     },
     {
@@ -30,8 +31,8 @@ const reportsData = [
 ];
 
 const statusLabels = {
-    pending: "Menunggu",
-    progress: "Diproses",
+    pending: "Perlu Ditinjau",
+    progress: "Dalam Proses",
     completed: "Selesai",
     rejected: "Ditolak",
 };
@@ -48,7 +49,8 @@ export default function RiwayatUser() {
     const [categoryFilter, setCategoryFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [filteredReports, setFilteredReports] = useState(reportsData);
-    
+    const navigate = useNavigate();
+
     // Modal
     const [showModal, setShowModal] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
@@ -158,14 +160,16 @@ export default function RiwayatUser() {
                         </Form.Group>
                     </Col>
                     <Col md="auto">
-                        <Button className="w-100" onClick={() => alert("Form laporan baru")}>➕ Buat Laporan Baru</Button>
+                        <Button className="w-100" style={{
+                            background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)"
+                        }} type="button" onClick={() => navigate("/Lapor")}> <i class="fa-solid fa-plus"></i> Buat Laporan Baru</Button>
                     </Col>
                 </Row>
 
                 <Row>
                     {filteredReports.length === 0 ? (
                         <Col className="text-center text-muted py-5">
-                            <div style={{ fontSize: "3rem" }}>📋</div>
+                            <div style={{ fontSize: "3rem" }}><i class="fa-solid fa-inbox" style={{ color: "" }}></i> </div>
                             <h4 className="mt-3">Tidak ada laporan</h4>
                             <p>Belum ada laporan yang sesuai dengan kriteria pencarian Anda.</p>
                         </Col>
@@ -173,20 +177,53 @@ export default function RiwayatUser() {
                         filteredReports.map((report) => (
                             <Col md={6} lg={4} key={report.id} className="mb-4">
                                 <Card onClick={() => handleCardClick(report)} style={{ cursor: "pointer" }}>
-                                    <Card.Header className="bg-primary text-white">
+                                    <Card.Header
+                                        className="text-white"
+                                        style={{
+                                            background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)"
+                                        }}
+                                    >
                                         <small>{report.id}</small>
                                         <h5 className="mt-2">{report.title}</h5>
-                                        <small>📅 {formatDate(report.date)}</small>
+                                        <small> <i className="fa-solid fa-calendar-days"></i> {formatDate(report.date)}</small>
                                     </Card.Header>
                                     <Card.Body>
-                                        <Badge bg="info" className="mb-2">
+                                        <Badge
+                                            className="mb-2"
+                                            style={{
+                                                background: "linear-gradient(45deg, #0dcaf0 0%, #6f42c1 100%)",
+                                                color: "white"
+                                            }}
+                                        >
                                             {categoryLabels[report.category]}
                                         </Badge>
-                                        <p className="text-muted">📍 {report.location}</p>
+                                        <p className="text-muted"> <i className="fa-solid fa-location-dot me-2" style={{ color: "#dc3545" }}></i> {report.location}</p>
                                         <p>{report.description.substring(0, 100)}...</p>
                                         <div className="d-flex justify-content-between align-items-center">
-                                            <Badge bg="secondary">{statusLabels[report.status]}</Badge>
-                                            {report.hasMedia && <span style={{ color: "#0d6efd" }}>📎 Media</span>}
+                                            <Badge
+                                                style={{
+                                                    background:
+                                                        report.status === "progress"
+                                                            ? "linear-gradient(45deg, #ffc107, #fd7e14)" // warna oranye untuk 'Diproses'
+                                                            : report.status === "pending"
+                                                                ? "linear-gradient(45deg, #6c757d, #adb5bd)" // abu-abu untuk 'Menunggu'
+                                                                : report.status === "completed"
+                                                                    ? "linear-gradient(45deg, #198754, #20c997)" // hijau untuk 'Selesai'
+                                                                    : report.status === "rejected"
+                                                                        ? "linear-gradient(45deg, #dc3545, #ff073a)" // merah untuk 'Ditolak'
+                                                                        : "#6c757d",
+                                                    color: "white"
+                                                }}
+                                            >
+                                                {statusLabels[report.status]}
+                                            </Badge>
+
+                                            {report.hasMedia && (
+                                                <span className="text-primary"
+                                                >
+                                                    <i class="fa-solid fa-paperclip"></i> Media
+                                                </span>
+                                            )}
                                         </div>
                                     </Card.Body>
                                 </Card>
@@ -198,23 +235,140 @@ export default function RiwayatUser() {
 
             {/* Modal Detail Laporan */}
             {selectedReport && (
-                <Modal show={showModal} onHide={handleCloseModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>{selectedReport.title}</Modal.Title>
+                <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
+                    <Modal.Header
+                        closeButton
+                        style={{
+                            background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)",
+                            color: "white",
+                            border: "none"
+                        }}
+                    >
+                        <Modal.Title style={{ fontSize: "1.5rem", fontWeight: "600" }}>
+                            {selectedReport.title}
+                        </Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>
-                        <p><strong>ID Laporan:</strong> {selectedReport.id}</p>
-                        <p><strong>Tanggal:</strong> {formatDate(selectedReport.date)}</p>
-                        <p><strong>Kategori:</strong> {categoryLabels[selectedReport.category]}</p>
-                        <p><strong>Lokasi:</strong> {selectedReport.location}</p>
-                        <p><strong>Deskripsi:</strong><br />{selectedReport.description}</p>
-                        <p><strong>Status:</strong> {statusLabels[selectedReport.status]}</p>
+                    <Modal.Body style={{ padding: "2rem" }}>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="mb-3">
+                                    <strong style={{ color: "#6c757d" }}>ID Laporan:</strong>
+                                    <div style={{
+                                        background: "linear-gradient(45deg, #f8f9fa, #e9ecef)",
+                                        padding: "8px 12px",
+                                        borderRadius: "6px",
+                                        marginTop: "4px",
+                                        fontFamily: "monospace"
+                                    }}>
+                                        {selectedReport.id}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="mb-3">
+                                    <strong style={{ color: "#6c757d" }}>Tanggal:</strong>
+                                    <div style={{ marginTop: "4px" }}>
+                                        <i className="fa-solid fa-calendar-days me-2" style={{ color: "#0d6efd" }}></i>
+                                        {formatDate(selectedReport.date)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="mb-3">
+                                    <strong style={{ color: "#6c757d" }}>Kategori:</strong>
+                                    <div style={{ marginTop: "8px" }}>
+                                        <span
+                                            className="badge"
+                                            style={{
+                                                background: "linear-gradient(45deg, #0dcaf0 0%, #6f42c1 100%)",
+                                                color: "white",
+                                                fontSize: "0.9rem",
+                                                padding: "8px 16px",
+                                                borderRadius: "12px"
+                                            }}
+                                        >
+                                            {categoryLabels[selectedReport.category]}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="mb-3">
+                                    <strong style={{ color: "#6c757d" }}>Status:</strong>
+                                    <div style={{ marginTop: "8px" }}>
+                                        <span className="badge bg-secondary" style={{ fontSize: "0.9rem", padding: "8px 16px" }}>
+                                            {statusLabels[selectedReport.status]}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mb-3">
+                            <strong style={{ color: "#6c757d" }}>Lokasi:</strong>
+                            <div style={{ marginTop: "4px" }}>
+                                <i className="fa-solid fa-location-dot me-2" style={{ color: "#dc3545" }}></i>
+                                {selectedReport.location}
+                            </div>
+                        </div>
+
+                        <div className="mb-3">
+                            <strong style={{ color: "#6c757d" }}>Deskripsi:</strong>
+                            <div style={{
+                                marginTop: "8px",
+                                padding: "16px",
+                                backgroundColor: "#f8f9fa",
+                                borderRadius: "8px",
+                                border: "1px solid #e9ecef",
+                                lineHeight: "1.6"
+                            }}>
+                                {selectedReport.description}
+                            </div>
+                        </div>
+
                         {selectedReport.hasMedia && (
-                            <p><strong>Media:</strong> 📎 Ada media terkait</p>
+                            <div className="mb-3">
+                                <strong style={{ color: "#6c757d" }}>Media:</strong>
+                                <div style={{
+                                    marginTop: "8px",
+                                    padding: "12px 16px",
+                                    background: "linear-gradient(45deg, #e3f2fd, #f3e5f5)",
+                                    borderRadius: "8px",
+                                    border: "1px solid #bbdefb"
+                                }}>
+                                    <i
+                                        className="fa-solid fa-file me-2"
+                                        style={{
+                                            background: "linear-gradient(45deg, #0d6efd, #6610f2)",
+                                            WebkitBackgroundClip: "text",
+                                            WebkitTextFillColor: "transparent",
+                                            backgroundClip: "text"
+                                        }}
+                                    ></i>
+                                    Ada media terkait
+                                </div>
+                            </div>
                         )}
                     </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseModal}>
+                    <Modal.Footer style={{
+                        background: "#f8f9fa",
+                        border: "none",
+                        padding: "1rem 2rem"
+                    }}>
+                        <Button
+                            variant="secondary"
+                            onClick={handleCloseModal}
+                            style={{
+                                background: "linear-gradient(135deg, #6c757d 0%, #495057 100%)",
+                                border: "none",
+                                padding: "10px 24px",
+                                borderRadius: "6px",
+                                fontWeight: "500"
+                            }}
+                        >
                             Tutup
                         </Button>
                     </Modal.Footer>
