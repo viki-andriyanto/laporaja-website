@@ -2,13 +2,6 @@ import { Link } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 
 export default function Sidebar() {
-  const handleScroll = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <nav
       className="col-md-3 col-lg-2 d-md-block bg-dark sidebar text-white"
@@ -18,12 +11,15 @@ export default function Sidebar() {
         <div className="sidebar-header px-3 py-4 border-bottom">
           <h4 className="mb-0">
             <i className="me-2"></i>
-            <img
-              src="../src/assets/logo.png" // Path absolut ke public/assets
-              alt="Logo"
-              style={{ height: "30px", objectFit: "contain" }}
-              className="me-2"
-            />
+            {/* Bungkus logo dengan Link */}
+            <Link to="/dashboard" className="d-flex align-items-center">
+              <img
+                src="../src/assets/logo.png"
+                alt="Logo"
+                style={{ height: "30px", objectFit: "contain" }}
+                className="me-2"
+              />
+            </Link>
           </h4>
           <small className="text-muted">Administrator Panel</small>
         </div>
@@ -34,7 +30,7 @@ export default function Sidebar() {
               Beranda
             </a>
             <li className="nav-item">
-              <a className="nav-link text-white" href="#">
+              <a className="nav-link text-white" href="/Pengguna">
                 <i className="bi bi-people me-2"></i>
                 Pengguna
               </a>
@@ -43,7 +39,7 @@ export default function Sidebar() {
           <li className="nav-item">
             <a className="nav-link text-white" href="/Kelola-Laporan">
               <i className="bi bi-inbox me-2"></i>
-              Laporan Masuk
+              Kelola Laporan
             </a>
           </li>
           <li className="nav-item">
