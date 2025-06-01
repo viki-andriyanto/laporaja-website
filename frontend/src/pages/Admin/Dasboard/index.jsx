@@ -29,17 +29,19 @@ const AdminDashboard = () => {
       date: "25-06-2025",
       status: "Dalam Proses",
     },
+
     {
-      title: "Jembatan Retak Membahayakan Pengguna",
-      date: "26-06-2025",
+      title: "Laporan kerusakan jalan di Jalan Merdeka",
+      date: "12-01-2025",
       status: "Dalam Proses",
     },
 
     {
-      title: "Pedagang Kaki Lima Mengganggu Jalan",
-      date: "02-07-2025",
+      title: "Pengaduan sampah menumpuk di RT 05",
+      date: "13-01-2025",
       status: "Perlu Ditinjau",
     },
+
     {
       title: "Kurangnya Rambu Lalu Lintas",
       date: "03-07-2025",
@@ -47,18 +49,34 @@ const AdminDashboard = () => {
     },
 
     {
-      title: "Sampah Berserakan di Mangga Dua",
-      date: "04-07-2025",
+      title: "Laporan fasilitas taman rusak",
+      date: "15-01-2025",
       status: "Selesai",
     },
+
     {
-      title: "Perbaikan Trotoan Jln.Urip",
+      title: "Perbaikan Trotoar Jln.Urip",
       date: "05-07-2025",
       status: "Selesai",
     },
-    { title: "Pipa Air Bocor", date: "06-07-2025", status: "Selesai" },
 
-    { title: "Kasus Korupsi Bupati", date: "15-06-2025", status: "Ditolak" },
+    { 
+      title: "Pipa Air Bocor", 
+      date: "06-07-2025", 
+      status: "Selesai" 
+    },
+    
+    {
+      title: "Permohonan perbaikan drainase di komplek Permai",
+      date: "14-01-2025",
+      status: "Ditolak",
+    },
+
+    {
+      title: "Permohonan pemasangan rambu lalu lintas",
+      date: "17-01-2025",
+      status: "Ditolak",
+    },
   ];
 
   // Hitung statistik laporan
@@ -123,11 +141,11 @@ const AdminDashboard = () => {
             <div className="d-flex gap-3">
               <div className="bg-primary text-white p-2 rounded">
                 <small>Total Laporan</small>
-                <h3 className="mb-0">8</h3>
+                <h3 className="mb-0">9</h3>
               </div>
               <div className="bg-success text-white p-2 rounded">
                 <small>Pengguna</small>
-                <h3 className="mb-0">5</h3>
+                <h3 className="mb-0">12</h3>
               </div>
             </div>
           </div>
