@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from "../../../shared/sidebar";
 
-const Pengguna = () => {
   // Data dummy pengguna (dalam aplikasi nyata, data akan diambil dari API)
-  const allUsers = [
-    { id: 1, nik: '3201123400010001', nama: 'Budi Santoso', jenisKelamin: 'Laki-laki' },
-    { id: 2, nik: '3201123400010002', nama: 'Siti Rahayu', jenisKelamin: 'Perempuan' },
-    { id: 3, nik: '3201123400010003', nama: 'Ahmad Fauzi', jenisKelamin: 'Laki-laki' },
-    { id: 4, nik: '3201123400010004', nama: 'Dewi Lestari', jenisKelamin: 'Perempuan' },
-    { id: 5, nik: '3201123400010005', nama: 'Rudi Hartono', jenisKelamin: 'Laki-laki' },
-    { id: 6, nik: '3201123400010006', nama: 'Ani Wijaya', jenisKelamin: 'Perempuan' },
-    { id: 7, nik: '3201123400010007', nama: 'Eko Prasetyo', jenisKelamin: 'Laki-laki' },
-    { id: 8, nik: '3201123400010008', nama: 'Maya Sari', jenisKelamin: 'Perempuan' },
-    { id: 9, nik: '3201123400010009', nama: 'Joko Susilo', jenisKelamin: 'Laki-laki' },
-    { id: 10, nik: '3201123400010010', nama: 'Rina Permata', jenisKelamin: 'Perempuan' },
-    { id: 11, nik: '3201123400010011', nama: 'Hendra Kurniawan', jenisKelamin: 'Laki-laki' },
-    { id: 12, nik: '3201123400010012', nama: 'Lina Anggraeni', jenisKelamin: 'Perempuan' },
-  ];
+const allUsers = [
+  { id: 1, nik: '3201123400010001', nama: 'Budi Santoso', jenisKelamin: 'Laki-laki' },
+  { id: 2, nik: '3201123400010002', nama: 'Siti Rahayu', jenisKelamin: 'Perempuan' },
+  { id: 3, nik: '3201123400010003', nama: 'Ahmad Fauzi', jenisKelamin: 'Laki-laki' },
+  { id: 4, nik: '3201123400010004', nama: 'Dewi Lestari', jenisKelamin: 'Perempuan' },
+  { id: 5, nik: '3201123400010005', nama: 'Rudi Hartono', jenisKelamin: 'Laki-laki' },
+  { id: 6, nik: '3201123400010006', nama: 'Ani Wijaya', jenisKelamin: 'Perempuan' },
+  { id: 7, nik: '3201123400010007', nama: 'Eko Prasetyo', jenisKelamin: 'Laki-laki' },
+  { id: 8, nik: '3201123400010008', nama: 'Maya Sari', jenisKelamin: 'Perempuan' },
+  { id: 9, nik: '3201123400010009', nama: 'Joko Susilo', jenisKelamin: 'Laki-laki' },
+  { id: 10, nik: '3201123400010010', nama: 'Rina Permata', jenisKelamin: 'Perempuan' },
+  { id: 11, nik: '3201123400010011', nama: 'Hendra Kurniawan', jenisKelamin: 'Laki-laki' },
+  { id: 12, nik: '3201123400010012', nama: 'Lina Anggraeni', jenisKelamin: 'Perempuan' },
+];
+
+const Pengguna = () => {
 
   // State untuk manajemen data
   const [users, setUsers] = useState([]);
@@ -28,7 +29,7 @@ const Pengguna = () => {
   // Efek untuk inisialisasi data
   useEffect(() => {
     setUsers(allUsers);
-  });
+  }, []);
 
   // Fungsi untuk menghandle pencarian
   const handleSearch = (e) => {
