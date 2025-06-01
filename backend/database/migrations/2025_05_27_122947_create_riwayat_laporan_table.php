@@ -13,6 +13,7 @@ return new class extends Migration
             $table->enum('jenis_surat', ['laporan', 'surat']);
             $table->dateTime('tanggal');
             $table->string('judul_lapor', 200);
+            $table->text('deskripsi');
             $table->enum('status', ['dalam proses', 'perlu ditinjau', 'selesai', 'ditolak']);
             $table->text('komentar')->nullable();
             $table->string('gambar', 100)->nullable();

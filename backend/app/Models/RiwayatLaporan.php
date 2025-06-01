@@ -16,6 +16,7 @@ class RiwayatLaporan extends Model
         'jenis_surat',
         'tanggal',
         'judul_lapor',
+        'deskripsi',
         'status',
         'komentar',
         'gambar',

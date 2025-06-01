@@ -56,7 +56,7 @@ class RiwayatLaporanController extends Controller
             'jenis_surat' => 'required|in:laporan,surat',
             'tanggal' => 'required|date',
             'judul_lapor' => 'required|string|max:200',
-            'komentar' => 'nullable|string',
+            'deskripsi' => 'required|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'users_user_id' => 'required|exists:users,id',
             'laporan_laporan_id' => 'nullable|exists:laporan,laporan_id',
@@ -105,7 +105,7 @@ class RiwayatLaporanController extends Controller
             'jenis_surat' => 'sometimes|required|in:laporan,surat',
             'tanggal' => 'sometimes|required|date',
             'judul_lapor' => 'sometimes|required|string|max:200',
-            'komentar' => 'nullable|string',
+            'deskripsi' => 'sometimes|required|string',
             'gambar' => 'nullable|string|max:100',
             'users_user_id' => 'sometimes|required|exists:users,id',
             'laporan_laporan_id' => 'nullable|exists:laporan,laporan_id',
@@ -144,7 +144,7 @@ class RiwayatLaporanController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:dalam proses,perlu ditinjau,selesai,ditolak',
-            'komentar' => 'nullable|string'
+            'komentar' => 'required|string'
         ]);
 
         if ($validator->fails()) {
