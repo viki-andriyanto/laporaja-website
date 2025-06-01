@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('kategori', function (Blueprint $table) {
             $table->id('kategori_id');
             $table->string('nama_kategori', 200);
+            $table->foreignId('users_user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

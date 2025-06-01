@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('laporan_id');
             $table->string('lokasi_kejadian', 255);
             $table->dateTime('tanggal_kejadian');
+            $table->foreignId('kategori_kategori_id')->constrained('kategori', 'kategori_id')->onDelete('cascade');
             $table->timestamps();
         });
     }

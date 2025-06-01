@@ -6,34 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('riwayat_laporan', function (Blueprint $table) {
-            $table->id('riwayat_id');
+            $table->bigIncrements('riwayat_id');
+            $table->enum('jenis_surat', ['laporan', 'surat']);
             $table->dateTime('tanggal');
             $table->string('judul_lapor', 200);
             $table->enum('status', ['dalam proses', 'perlu ditinjau', 'selesai', 'ditolak']);
             $table->text('komentar')->nullable();
-            $table->string('kategori', 200);
             $table->string('gambar', 100)->nullable();
-            
-            // Foreign keys
-            $table->foreignId('users_user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('kategori_kategori_id')->constrained('kategori', 'kategori_id')->onDelete('cascade');
-            $table->foreignId('laporan_laporan_id')->constrained('laporan', 'laporan_id')->onDelete('cascade');
-            $table->foreignId('surat_surat_id')->constrained('surat', 'surat_id')->onDelete('cascade');
-            
+            $table->unsignedBigInteger('users_user_id');
+            $table->unsignedBigInteger('laporan_laporan_id')->nullable();
+            $table->unsignedBigInteger('surat_surat_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('users_user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('laporan_laporan_id')->references('laporan_id')->on('laporan')->onDelete('cascade');
+            $table->foreign('surat_surat_id')->references('surat_id')->on('surat')->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('riwayat_laporan');
     }
