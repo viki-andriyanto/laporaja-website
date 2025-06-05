@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Button, Row, Col, Form, Card, Badge, Modal } from 'react-bootstrap';
-import Header from "../../shared/header";
-import Footer from "../../shared/footer";
+import Header from "../../../shared/header";
+import Footer from "../../../shared/footer";
 import { useNavigate } from "react-router";
 
 // Data Dummy

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import Footer from "../../shared/footer";
-import Header from "../../shared/header";
+import Footer from "../../../shared/footer";
+import Header from "../../../shared/header";
 import { useNavigate } from "react-router-dom";
 
-export default function Lapor() {
+export default function FormLapor() {
     const navigate = useNavigate();
     const [formType, setFormType] = useState("laporan");
 

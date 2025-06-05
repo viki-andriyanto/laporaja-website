@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import Sidebar from "../../../shared/sidebar";
+import Sidebar from "../../shared/sidebar";
 
 // Register Chart.js components
 ChartJS.register(
