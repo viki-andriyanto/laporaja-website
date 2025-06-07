@@ -30,7 +30,8 @@ class AuthController extends Controller
             'nik' => $request->nik,
             'nama_lengkap' => $request->nama_lengkap,
             'no_telepon' => $request->no_telepon,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'role' => 'user'
         ]);
 
         // Cek keberhasilan

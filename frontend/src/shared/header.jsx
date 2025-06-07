@@ -80,10 +80,10 @@ export default function Header() {
                 </ul>
 
                 <div className="col-md-3 text-end">
-                    <Link to="/login?view=login" className="btn btn-outline-primary me-3 rounded-pill">
+                    <Link to="/login" className="btn btn-outline-primary me-3 rounded-pill">
                         Masuk
                     </Link> 
-                    <Link to="/login?view=register" className="btn btn-primary rounded-pill">
+                    <Link to="/register" className="btn btn-primary rounded-pill">
                         Daftar
                     </Link>
                 </div>

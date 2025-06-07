@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AuthPage from "./pages/Login/index";
 import RiwayatAdmin from "./pages/admin/riwayatadmin";
 import KelolaLaporan from "./pages/admin/kelolalaporan";
 import Pengguna from "./pages/Admin/Pengguna";
@@ -7,6 +6,9 @@ import AdminDashboard from "./pages/admin/index";
 import LandingPage from "./pages/public";
 import FormLapor from "./pages/public/laporan/create";
 import RiwayatUser from "./pages/public/riwayat-user/index";
+// Import Auth Components
+import Login from "./pages/_auth/login";
+import Register from "./pages/_auth/register";
 
 function App() {
   return (
@@ -14,13 +16,19 @@ function App() {
       <div className="container">
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
             <Route index element={<LandingPage />} />
             <Route path="/lapor" element={<FormLapor />} />
             <Route path="/riwayat-user" element={<RiwayatUser />} />
+            
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Admin Routes */}
             <Route path="/kelola-laporan" element={<KelolaLaporan />} />
             <Route path="/riwayat-admin" element={<RiwayatAdmin />} />
             <Route path="/pengguna" element={<Pengguna />} />
-            <Route path="/login" element={<AuthPage />} />
             <Route path="/dashboard" element={<AdminDashboard />} />
           </Routes>
         </BrowserRouter>
