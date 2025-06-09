@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { register } from '../../_services/auth';
 import backgroundImage from '../../assets/background.png';
@@ -16,6 +17,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -29,7 +31,7 @@ export default function Register() {
     setIsLoading(true);
     setError('');
     setSuccess('');
-
+  
     try {
       const response = await register({
         nik: formData.nik,
@@ -38,8 +40,10 @@ export default function Register() {
         noTelepon: formData.noTelepon,
         email: formData.email
       });
+  
       console.log('Registrasi berhasil:', response);
-      setSuccess('Registrasi berhasil! Anda dapat login sekarang.');
+      setSuccess('Registrasi berhasil! Anda akan diarahkan ke halaman login.');
+  
       // Reset form
       setFormData({
         nik: '',
@@ -48,6 +52,11 @@ export default function Register() {
         noTelepon: '',
         email: ''
       });
+  
+      // Redirect ke login setelah 2 detik
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (error) {
       setError('Registrasi gagal. Periksa data Anda dan coba lagi.');
       console.error('Register error:', error);

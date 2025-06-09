@@ -5,6 +5,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\RiwayatLaporanController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +27,7 @@ Route::get('/user', function (Request $request) {
 // Routes untuk Authentication
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout'); 
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth:api'])->group(function () {
     // Routes untuk semua authenticated user
@@ -38,30 +39,37 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/surat/{id}', [SuratController::class, 'show']); // Updated: menggunakan ID langsung
     Route::get('/riwayat-laporan', [RiwayatLaporanController::class, 'index']);
     Route::get('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'show']); // Updated: menggunakan ID langsung
-    
+
+    Route::get('/user', [UserController::class, 'index']);
+    Route::get('/user/{id}', [UserController::class, 'show']);
+    Route::post('/user/{user}', [UserController::class, 'update']);
+
     // Routes untuk user biasa (create laporan/surat)
     Route::post('/laporan', [LaporanController::class, 'store']);
     Route::post('/surat', [SuratController::class, 'store']);
     Route::post('/riwayat-laporan', [RiwayatLaporanController::class, 'store']);
-    
+
     // Routes dengan middleware tambahan untuk admin
     Route::middleware('role:admin')->group(function () {
         // Kategori management (admin only)
         Route::post('/kategori', [KategoriController::class, 'store']);
         Route::post('/kategori/{kategori}', [KategoriController::class, 'update']);
         Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy']);
-        
+
         // Laporan management (admin only)
         Route::post('/laporan/{laporan}', [LaporanController::class, 'update']);
         Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy']);
-        
+
         // Surat management (admin only)
         Route::post('/surat/{surat}', [SuratController::class, 'update']);
         Route::delete('/surat/{surat}', [SuratController::class, 'destroy']);
-        
+
         // Riwayat Laporan management (admin only)
         Route::post('/riwayat-laporan/{riwayatLaporan}', [RiwayatLaporanController::class, 'update']);
         Route::post('/riwayat-laporan/{riwayatLaporan}/status', [RiwayatLaporanController::class, 'updateStatus']); // Route khusus update status
         Route::delete('/riwayat-laporan/{riwayatLaporan}', [RiwayatLaporanController::class, 'destroy']);
+
+        // User management (admin only)
+        Route::delete('/user/{user}', [UserController::class, 'destroy']);
     });
 });

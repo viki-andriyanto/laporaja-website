@@ -31,9 +31,15 @@ export default function Login() {
         nik: formData.nik,
         password: formData.password
       });
-
+    
+      // Simpan data user ke localStorage jika perlu
+      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('token', response.token);
+    
       console.log('Login berhasil:', response);
-      navigate('/dashboard'); // Ganti dengan rute tujuan kamu
+    
+      // Arahkan ke landing page
+      navigate('/');
     } catch (error) {
       const msg = error.response?.data?.message || 'Login gagal. Periksa NIK dan password Anda.';
       setError(msg);

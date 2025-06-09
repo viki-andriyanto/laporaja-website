@@ -9,6 +9,7 @@ import RiwayatUser from "./pages/public/riwayat-user/index";
 // Import Auth Components
 import Login from "./pages/_auth/login";
 import Register from "./pages/_auth/register";
+import Profil from "./shared/profil";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       <div className="container">
         <BrowserRouter>
           <Routes>
-            {/* Public Routes */}
+            
             <Route index element={<LandingPage />} />
             <Route path="/lapor" element={<FormLapor />} />
             <Route path="/riwayat-user" element={<RiwayatUser />} />
@@ -25,7 +26,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* Admin Routes */}
+            <Route path="/profil" element={<Profil />} />
             <Route path="/kelola-laporan" element={<KelolaLaporan />} />
             <Route path="/riwayat-admin" element={<RiwayatAdmin />} />
             <Route path="/pengguna" element={<Pengguna />} />

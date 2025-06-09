@@ -1,12 +1,31 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
 
 export default function Header() {
+    const navigate = useNavigate();
+
+    // Ambil user dari localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+
     const handleScroll = (id) => {
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
         }
+    };
+
+    const getInitials = (fullName) => {
+        if (!fullName) return '';
+        const names = fullName.trim().split(' ');
+        const initials = names.length > 1
+            ? names[0][0] + names[1][0]
+            : names[0].substring(0, 2);
+        return initials.toUpperCase();
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/login');
     };
 
     return (
@@ -60,7 +79,7 @@ export default function Header() {
                         </Link>
                     </li>
 
-                    {/* Dropdown */}
+                    {/* Dropdown Lapor */}
                     <li>
                         <Dropdown>
                             <Dropdown.Toggle variant="light" id="dropdown-basic" className="nav-link px-2 link-dark border-0">
@@ -68,24 +87,53 @@ export default function Header() {
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-                                <Dropdown.Item as={Link} to="/lapor">
-                                    Buat Laporan
-                                </Dropdown.Item>
-                                <Dropdown.Item as={Link} to="/Riwayat-User">
-                                    Riwayat Laporan
-                                </Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/lapor">Buat Laporan</Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/Riwayat-User">Riwayat Laporan</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                     </li>
                 </ul>
 
                 <div className="col-md-3 text-end">
-                    <Link to="/login" className="btn btn-outline-primary me-3 rounded-pill">
-                        Masuk
-                    </Link> 
-                    <Link to="/register" className="btn btn-primary rounded-pill">
-                        Daftar
-                    </Link>
+                    {!user ? (
+                        <>
+                            <Link to="/login" className="btn btn-outline-primary me-3 rounded-pill">
+                                Masuk
+                            </Link> 
+                            <Link to="/register" className="btn btn-primary rounded-pill">
+                                Daftar
+                            </Link>
+                        </>
+                    ) : (
+                        <div className="d-flex justify-content-end align-items-center">
+                            <Dropdown align="end">
+                                <Dropdown.Toggle 
+                                    variant="light" 
+                                    className="border-0 p-0 d-flex align-items-center gap-2"
+                                    style={{ backgroundColor: 'transparent' }}
+                                >
+                                    <div 
+                                        className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                                        style={{ 
+                                            width: '40px', 
+                                            height: '40px', 
+                                            fontWeight: 'bold',
+                                            flexShrink: 0 
+                                        }}
+                                        title={user.nama_lengkap}
+                                    >
+                                        {getInitials(user.nama_lengkap)}
+                                    </div>
+                                </Dropdown.Toggle>
+
+                                <Dropdown.Menu>
+                                    <Dropdown.Item as={Link} to="/profil">Profil</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
+                    )}
                 </div>
             </header>
         </div>
