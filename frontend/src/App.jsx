@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RiwayatAdmin from "./pages/admin/riwayatadmin";
-import KelolaLaporan from "./pages/admin/kelolalaporan";
+import KelolaLaporan from "./pages/Admin/kelolalaporan";
 import Pengguna from "./pages/Admin/Pengguna";
 import AdminDashboard from "./pages/admin/index";
 import LandingPage from "./pages/public";

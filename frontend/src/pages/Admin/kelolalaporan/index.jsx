@@ -5,529 +5,416 @@ import {
   Modal,
   Form,
   Badge,
-  Container,
-  Row,
-  Col,
   Image,
+  ButtonGroup,
 } from "react-bootstrap";
-import Sidebar from "../../../shared/sidebar"; // Sesuaikan path sidebar Anda
+import { Check2, X, Trash, Eye } from "react-bootstrap-icons";
+import Sidebar from "../../../shared/sidebar";
+import { isValid, parseISO, format } from "date-fns";
+import {
+  getAllRiwayat,
+  updateRiwayat,
+  deleteRiwayat,
+} from "../../../_services/riwayat-laporan";
 
-// Data dummy
-const laporanDummy = [
-  {
-    id: 1,
-    tanggal: "12/01/2025",
-    isi: "Laporan kerusakan jalan di Jalan Merdeka",
-    status: "DALAM PROSES",
-    komentar: "Sedang diperbaiki oleh petugas",
-    media: [
-      "https://imgx.gridoto.com/crop/0x0:0x0/700x465/photo/2023/05/02/lampungjpg-20230502023313.jpg",
-    ],
-  },
-  {
-    id: 2,
-    tanggal: "13/01/2025",
-    isi: "Pengaduan sampah menumpuk di RT 05",
-    status: "PERLU DITINJAU",
-    komentar: "",
-    media: [
-      "https://th.bing.com/th/id/OIP.zej-qqKuvTr9A9SL1wDhlgHaFj?w=205&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-    ],
-  },
-  {
-    id: 3,
-    tanggal: "14/01/2025",
-    isi: "Permohonan perbaikan drainase di komplek Permai",
-    status: "DITOLAK",
-    komentar: "Tidak sesuai dengan wilayah kerja kami",
-    media: [
-      "https://th.bing.com/th/id/OIP.xFiqJH7MeoVP_MfSxaiFLwHaEK?w=317&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-    ],
-  },
-  {
-    id: 4,
-    tanggal: "15/01/2025",
-    isi: "Laporan fasilitas taman rusak",
-    status: "SELESAI",
-    komentar: "Sudah diperbaiki oleh petugas",
-    media: [
-      "https://akcdn.detik.net.id/community/media/visual/2018/02/18/8cbed52e-a643-457a-92a1-49c9de80ed4e.jpeg?w=700&q=90",
-    ],
-  },
-  {
-    id: 5,
-    tanggal: "16/01/2025",
-    isi: "Pengaduan kebisingan dari tempat usaha",
-    status: "PERLU DITINJAU",
-    komentar: "",
-    media: [
-      "https://i.ytimg.com/vi/185yAl-KJUg/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGGUgVihHMA8=&rs=AOn4CLDc_OFWQYOnDsMHaJ2T2FhYZfulYQ",
-    ],
-  },
-  {
-    id: 6,
-    tanggal: "17/01/2025",
-    isi: "Permohonan pemasangan rambu lalu lintas",
-    status: "DITOLAK",
-    komentar: "Sudah ada rambu di lokasi tersebut",
-    media: [
-      "https://murtigading.bantulkab.go.id/assets/files/artikel/sedang_1561530174pemasangan%20rambu%20lalu%20lintas.jpeg",
-    ],
-  },
-  {
-    id: 7,
-    tanggal: "25/06/2025",
-    isi: "Perbaikan saluran air",
-    status: "DALAM PROSES",
-    komentar: "Sedang diperbaiki oleh petugas",
-    media: [
-      "https://jatimnow.com/po-content/uploads/202212/img-20221213-wa0004.jpg",
-    ],
-  },
-  {
-    id: 8,
-    tanggal: "06/07/2025",
-    isi: "Pipa Air Bocor",
-    status: "SELESAI",
-    komentar: "Sudah diperbaiki oleh petugas",
-    media: [
-      "https://th.bing.com/th/id/OIP.5Yvjwknoals9PoJhkWYswwHaE9?rs=1&pid=ImgDetMain",
-    ],
-  },
-  {
-    id: 9,
-    tanggal: "05/07/2025",
-    isi: "Perbaikan Trotoar Jln.Urip",
-    status: "SELESAI",
-    komentar: "Sudah diperbaiki oleh petugas",
-    media: [
-      "https://th.bing.com/th/id/OIP.bSENCKS_GgBIWskKu_Ij_wHaFM?w=245&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-    ],
-  },
+/* -------------------------------------------------------------------------- */
+/*  Helper util & constant                                                     */
+/* -------------------------------------------------------------------------- */
+
+const STATUS_OPTIONS = [
+  { key: "perlu ditinjau", label: "Tinjau", variant: "warning" },
+  { key: "dalam proses", label: "Proses", variant: "info" },
+  { key: "selesai", label: "Selesai", variant: "success" },
+  { key: "ditolak", label: "Tolak", variant: "danger" },
 ];
 
-const getStatusBadge = (status) => {
-  switch (status) {
-    case "PERLU DITINJAU":
-      return (
-        <Badge bg="warning" className="p-2">
-          PERLU DITINJAU
-        </Badge>
-      );
-    case "DALAM PROSES":
-      return (
-        <Badge bg="info" className="p-2">
-          DALAM PROSES
-        </Badge>
-      );
-    case "SELESAI":
-      return (
-        <Badge bg="success" className="p-2">
-          SELESAI
-        </Badge>
-      );
-    case "DITOLAK":
-      return (
-        <Badge bg="danger" className="p-2">
-          DITOLAK
-        </Badge>
-      );
-    default:
-      return (
-        <Badge bg="secondary" className="p-2">
-          {status}
-        </Badge>
-      );
-  }
+const getStatusBadge = (st) => {
+  const opt = STATUS_OPTIONS.find((s) => s.key === st);
+  return <Badge bg={opt?.variant ?? "secondary"}>{st.toUpperCase()}</Badge>;
 };
 
-const ModalDetailLaporan = ({ show, laporan, onHide, handleStatusChange }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+const formatTanggal = (t) => {
+  if (!t) return "-";
+  const safe = t.includes("T") ? t : t.replace(" ", "T");
+  const d = parseISO(safe);
+  return isValid(d) ? format(d, "dd/MM/yyyy HH:mm") : "-";
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Modal detail                                                               */
+/* -------------------------------------------------------------------------- */
+
+const ModalDetailRiwayat = ({ show, item, onHide, onUpdate }) => {
+  const [comment, setComment] = useState("");
+
+  useEffect(() => {
+    if (item) {
+      setComment(item.komentar ?? "");
+    }
+  }, [item]);
+
+  if (!item) return null;
+
+  const changeStatus = (status) => onUpdate(item.riwayat_id, status, comment);
 
   return (
     <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title>Detail Laporan</Modal.Title>
+        <Modal.Title>Detail Riwayat • ID #{item.riwayat_id}</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
-        <div className="mb-4">
-          <h4 className="fw-bold">{laporan?.isi}</h4>
-          <p className="text-muted mb-3">Tanggal: {laporan?.tanggal}</p>
+        {/* Info ringkas */}
+        <p className="mb-1">
+          <strong>Tanggal:</strong> {formatTanggal(item.tanggal)}
+        </p>
+        <p className="mb-1">
+          <strong>Jenis:</strong> {item.jenis_surat}
+        </p>
+        <p className="mb-3">
+          <strong>Status:</strong> {getStatusBadge(item.status)}
+        </p>
 
-          <div className="mb-3">
-            <h6 className="fw-bold">Status Laporan:</h6>
-            <div className="d-flex flex-wrap gap-2">
-              <Button
-                variant={
-                  laporan?.status === "PERLU DITINJAU"
-                    ? "warning"
-                    : "outline-warning"
-                }
-                onClick={() => handleStatusChange(laporan.id, "PERLU DITINJAU")}
-              >
-                Tinjau
-              </Button>
-              <Button
-                variant={
-                  laporan?.status === "DALAM PROSES" ? "info" : "outline-info"
-                }
-                onClick={() => handleStatusChange(laporan.id, "DALAM PROSES")}
-              >
-                Dalam Proses
-              </Button>
-              <Button
-                variant={
-                  laporan?.status === "SELESAI" ? "success" : "outline-success"
-                }
-                onClick={() => handleStatusChange(laporan.id, "SELESAI")}
-              >
-                Selesai
-              </Button>
-              <Button
-                variant={
-                  laporan?.status === "DITOLAK" ? "danger" : "outline-danger"
-                }
-                onClick={() => handleStatusChange(laporan.id, "DITOLAK")}
-              >
-                Tolak
-              </Button>
-            </div>
+        {/* Judul & Deskripsi */}
+        <h4 className="fw-bold">{item.judul_lapor}</h4>
+        <Form.Group className="mb-4">
+          <Form.Control
+            as="textarea"
+            rows={4}
+            readOnly
+            value={item.deskripsi || "-"}
+          />
+        </Form.Group>
+
+        {/* Gambar (opsional) */}
+        {item.gambar && (
+          <div className="text-center mb-4">
+            <Image
+              src={`http://localhost:8000/storage/${item.gambar}`}
+              fluid
+              rounded
+              style={{ maxHeight: 300 }}
+            />
           </div>
+        )}
 
-          {/* Isi Laporan Lengkap */}
-          <Form.Group className="mb-4">
-            <Form.Label className="fw-bold">Deskripsi</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={4}
-              value={laporan?.isi}
-              readOnly
-              className="bg-light"
-            />
-          </Form.Group>
+        {/* Komentar admin */}
+        <Form.Group className="mb-3">
+          <Form.Label className="fw-bold">Komentar Admin</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Tulis komentar…"
+          />
+        </Form.Group>
 
-          {/* Media yang disubmit pengguna */}
-          <Form.Group className="mb-4">
-            <Form.Label className="fw-bold">Media</Form.Label>
-            {laporan?.media && laporan.media.length > 0 ? (
-              <div className="media-gallery">
-                {/* Gambar utama */}
-                <div className="mb-3 text-center">
-                  <Image
-                    src={laporan.media[activeIndex]}
-                    alt={`Media ${activeIndex + 1}`}
-                    fluid
-                    className="rounded"
-                    style={{ maxHeight: "300px" }}
-                  />
-                </div>
-
-                {/* Thumbnail untuk navigasi */}
-                <div className="d-flex flex-wrap gap-2 justify-content-center">
-                  {laporan.media.map((media, index) => (
-                    <div
-                      key={index}
-                      className={`thumbnail ${
-                        activeIndex === index ? "active" : ""
-                      }`}
-                      onClick={() => setActiveIndex(index)}
-                      style={{
-                        cursor: "pointer",
-                        border:
-                          activeIndex === index
-                            ? "3px solid #0d6efd"
-                            : "1px solid #dee2e6",
-                      }}
-                    >
-                      <Image
-                        src={media}
-                        alt={`Thumbnail ${index + 1}`}
-                        width={80}
-                        height={60}
-                        className="object-fit-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-3 bg-light rounded">
-                <i className="bi bi-image fs-1 text-muted"></i>
-                <p className="mt-2 mb-0">Tidak ada media yang disertakan</p>
-              </div>
-            )}
-          </Form.Group>
-
-          {/* Komentar */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">Komentar</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              placeholder="Tulis komentar untuk laporan ini..."
-              defaultValue={laporan?.komentar || ""}
-            />
-          </Form.Group>
-        </div>
+        {/* Tombol ubah status */}
+        <h6 className="fw-bold">Ubah Status</h6>
+        <ButtonGroup className="flex-wrap gap-2">
+          {STATUS_OPTIONS.map(({ key, label, variant }) => (
+            <Button
+              key={key}
+              size="sm"
+              variant={item.status === key ? variant : `outline-${variant}`}
+              onClick={() => changeStatus(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </ButtonGroup>
       </Modal.Body>
+
       <Modal.Footer>
+        {/* aksi cepat ✔️ / ❌ */}
+        <Button
+          variant="success"
+          onClick={() => changeStatus("selesai")}
+          title="Tandai selesai"
+        >
+          <Check2 />
+        </Button>
+        <Button
+          variant="danger"
+          onClick={() => changeStatus("ditolak")}
+          title="Tandai ditolak"
+          className="me-auto"
+        >
+          <X />
+        </Button>
+
         <Button variant="secondary" onClick={onHide}>
           Tutup
-        </Button>
-        <Button variant="primary" onClick={onHide}>
-          Simpan Perubahan
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/*  Halaman utama                                                              */
+/* -------------------------------------------------------------------------- */
+
 const KelolaLaporan = () => {
-  const [laporan, setLaporan] = useState([]);
-  const [selectedLaporan, setSelectedLaporan] = useState(null);
+  const [riwayatData, setRiwayatData] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const itemsPerPage = 5;
 
+  /* -------------------------- fetch data awal --------------------------- */
   useEffect(() => {
-    // Simulasi pengambilan data dari API
-    setLaporan(laporanDummy);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Anda belum login. Silakan login dulu.");
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      try {
+        const list = await getAllRiwayat();
+        setRiwayatData(list);
+      } catch (err) {
+        console.error(err);
+        setError("Gagal memuat data.");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const handleShowModal = (laporan) => {
-    setSelectedLaporan(laporan);
+  /* -------------------------- handler util ------------------------------ */
+  const openModal = (item) => {
+    setSelectedItem(item);
     setShowModal(true);
   };
 
-  const handleCloseModal = () => {
+  const closeModal = () => {
     setShowModal(false);
+    setSelectedItem(null);
   };
 
-  const handleStatusChange = (id, status) => {
-    const updatedLaporan = laporan.map((item) =>
-      item.id === id ? { ...item, status } : item
-    );
-    setLaporan(updatedLaporan);
-
-    // Update juga laporan yang sedang dilihat di modal
-    if (selectedLaporan && selectedLaporan.id === id) {
-      setSelectedLaporan({ ...selectedLaporan, status });
+  const handleStatusChange = async (id, status, komentar) => {
+    try {
+      await updateRiwayat(id, { status, komentar });
+      setRiwayatData((prev) =>
+        prev.map((it) =>
+          it.riwayat_id === id ? { ...it, status, komentar } : it
+        )
+      );
+      if (selectedItem?.riwayat_id === id) {
+        setSelectedItem((s) => ({ ...s, status, komentar }));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Gagal memperbarui status.");
     }
   };
 
-  const handleCommentChange = (id, comment) => {
-    const updatedLaporan = laporan.map((item) =>
-      item.id === id ? { ...item, komentar: comment } : item
-    );
-    setLaporan(updatedLaporan);
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus laporan ini?")) {
-      const updatedLaporan = laporan.filter((item) => item.id !== id);
-      setLaporan(updatedLaporan);
+  const handleDelete = async (id) => {
+    if (!window.confirm("Yakin hapus data ini?")) return;
+    try {
+      await deleteRiwayat(id);
+      setRiwayatData((prev) => prev.filter((it) => it.riwayat_id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menghapus data.");
     }
   };
 
-  // Filter laporan berdasarkan pencarian
-  const filteredLaporan = laporan.filter(
-    (item) =>
-      item.isi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tanggal.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.status.toLowerCase().includes(searchTerm.toLowerCase())
+  /* -------------------------- filter & paging --------------------------- */
+  const filtered = riwayatData.filter((it) =>
+    [it.judul_lapor, it.status, it.jenis_surat, it.tanggal]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredLaporan.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredLaporan.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const currentItems = filtered.slice(indexOfLast - itemsPerPage, indexOfLast);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  /* -------------------------- render ----------------------------------- */
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border" role="status" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="alert alert-danger">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-fluid">
       <div className="row">
-        {/* Sidebar */}
         <Sidebar />
 
-        {/* Main Content */}
+        {/* -------------------------------- MAIN --------------------------- */}
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-          <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-            <h1 className="h2">Kelola Laporan</h1>
-            <div className="btn-toolbar mb-2 mb-md-0">
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Cari laporan..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button className="btn btn-outline-secondary" type="button">
-                  <i className="bi bi-search"></i>
-                </button>
-              </div>
-            </div>
+          {/* header */}
+          <div className="d-flex justify-content-between align-items-center border-bottom mb-4">
+            <h2>Kelola Riwayat Laporan &amp; Surat</h2>
+            <input
+              className="form-control w-auto"
+              placeholder="Cari…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          <div className="card shadow-sm mb-4">
-            <div className="card-body">
-              <div className="table-responsive">
-                <Table hover className="mb-0">
-                  <thead className="table-dark">
-                    <tr className="bg-light">
-                      <th width="15%">Tanggal</th>
-                      <th width="30%">Judul Laporan</th>
-                      <th width="15%">Status</th>
-                      <th width="25%">Komentar</th>
-                      <th width="15%" className="text-center">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.length > 0 ? (
-                      currentItems.map((item) => (
-                        <tr key={item.id}>
-                          <td>{item.tanggal}</td>
-                          <td>
-                            <div className="fw-semibold">
-                              {item.isi.substring(0, 30)}...
-                            </div>
-                          </td>
-                          <td>{getStatusBadge(item.status)}</td>
-                          <td>
-                            <Form.Control
-                              type="text"
-                              value={item.komentar}
-                              onChange={(e) =>
-                                handleCommentChange(item.id, e.target.value)
-                              }
-                              placeholder="Tulis komentar..."
-                              className="form-control-sm"
-                            />
-                          </td>
-                          <td className="text-center">
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              className="me-1"
-                              onClick={() => handleShowModal(item)}
-                              title="Detail"
-                            >
-                              <i className="bi bi-eye"></i>
-                            </Button>
-                            <Button
-                              variant="outline-success"
-                              size="sm"
-                              className="me-1"
-                              title="Selesaikan"
-                              onClick={() =>
-                                handleStatusChange(item.id, "SELESAI")
-                              }
-                            >
-                              <i className="bi bi-check-lg"></i>
-                            </Button>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              title="Hapus"
-                              onClick={() => handleDelete(item.id)}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </Button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center py-4">
-                          <div className="text-muted">
-                            <i
-                              className="bi bi-inbox"
-                              style={{ fontSize: "3rem" }}
-                            ></i>
-                            <p className="mt-2">
-                              Tidak ada laporan yang ditemukan
-                            </p>
-                          </div>
+          {/* tabel */}
+          <div className="card shadow-sm">
+            <div className="card-body table-responsive">
+              <Table hover>
+                <thead className="table-dark">
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Jenis</th>
+                    <th>Judul</th>
+                    <th>Status</th>
+                    <th>Komentar</th>
+                    <th className="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.length ? (
+                    currentItems.map((it) => (
+                      <tr key={it.riwayat_id}>
+                        <td>{formatTanggal(it.tanggal)}</td>
+                        <td>
+                          <Badge
+                            bg={
+                              it.jenis_surat === "laporan" ? "info" : "success"
+                            }
+                          >
+                            {it.jenis_surat.toUpperCase()}
+                          </Badge>
+                        </td>
+                        <td>{it.judul_lapor}</td>
+                        <td>{getStatusBadge(it.status)}</td>
+                        <td>
+                          <Form.Control
+                            size="sm"
+                            value={it.komentar || ""}
+                            placeholder="Komentar…"
+                            onChange={(e) =>
+                              handleStatusChange(
+                                it.riwayat_id,
+                                it.status,
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td className="text-center">
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="me-1"
+                            onClick={() => openModal(it)}
+                            title="Detail"
+                          >
+                            <Eye />
+                          </Button>
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            className="me-1"
+                            title="Selesai"
+                            onClick={() =>
+                              handleStatusChange(
+                                it.riwayat_id,
+                                "selesai",
+                                it.komentar
+                              )
+                            }
+                          >
+                            <Check2 />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            className="me-1"
+                            title="Tolak"
+                            onClick={() =>
+                              handleStatusChange(
+                                it.riwayat_id,
+                                "ditolak",
+                                it.komentar
+                              )
+                            }
+                          >
+                            <X />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            title="Hapus"
+                            onClick={() => handleDelete(it.riwayat_id)}
+                          >
+                            <Trash />
+                          </Button>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </Table>
-              </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-center py-4">
+                        Tidak ada data ditemukan.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
 
-              {/* Pagination */}
-              {filteredLaporan.length > itemsPerPage && (
-                <div className="d-flex justify-content-between align-items-center mt-3">
-                  <div className="text-muted">
-                    Menampilkan{" "}
-                    {Math.min(indexOfFirstItem + 1, filteredLaporan.length)} -
-                    {Math.min(indexOfLastItem, filteredLaporan.length)} dari{" "}
-                    {filteredLaporan.length} laporan
-                  </div>
-                  <nav>
-                    <ul className="pagination mb-0">
-                      <li
-                        className={`page-item ${
-                          currentPage === 1 ? "disabled" : ""
-                        }`}
-                      >
-                        <button
-                          className="page-link"
-                          onClick={() => paginate(currentPage - 1)}
+              {/* pagination sederhana */}
+              {totalPages > 1 && (
+                <nav className="d-flex justify-content-center">
+                  <ul className="pagination mb-0">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (n) => (
+                        <li
+                          key={n}
+                          className={`page-item ${
+                            n === currentPage && "active"
+                          }`}
                         >
-                          &laquo;
-                        </button>
-                      </li>
-
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (number) => (
-                          <li
-                            key={number}
-                            className={`page-item ${
-                              currentPage === number ? "active" : ""
-                            }`}
+                          <button
+                            className="page-link"
+                            onClick={() => setCurrentPage(n)}
                           >
-                            <button
-                              className="page-link"
-                              onClick={() => paginate(number)}
-                            >
-                              {number}
-                            </button>
-                          </li>
-                        )
-                      )}
-
-                      <li
-                        className={`page-item ${
-                          currentPage === totalPages ? "disabled" : ""
-                        }`}
-                      >
-                        <button
-                          className="page-link"
-                          onClick={() => paginate(currentPage + 1)}
-                        >
-                          &raquo;
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
+                            {n}
+                          </button>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </nav>
               )}
             </div>
           </div>
         </main>
       </div>
 
-      <ModalDetailLaporan
+      {/* ── Modal detail ───────────────────────────────────────────── */}
+      <ModalDetailRiwayat
         show={showModal}
-        laporan={selectedLaporan}
-        onHide={handleCloseModal}
-        handleStatusChange={handleStatusChange}
+        item={selectedItem}
+        onHide={closeModal}
+        onUpdate={handleStatusChange}
       />
     </div>
   );

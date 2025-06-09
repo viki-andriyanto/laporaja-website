@@ -65,9 +65,9 @@ Route::middleware(['auth:api'])->group(function () {
         Route::delete('/surat/{surat}', [SuratController::class, 'destroy']);
 
         // Riwayat Laporan management (admin only)
-        Route::post('/riwayat-laporan/{riwayatLaporan}', [RiwayatLaporanController::class, 'update']);
-        Route::post('/riwayat-laporan/{riwayatLaporan}/status', [RiwayatLaporanController::class, 'updateStatus']); // Route khusus update status
-        Route::delete('/riwayat-laporan/{riwayatLaporan}', [RiwayatLaporanController::class, 'destroy']);
+        Route::post('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'update']);
+        Route::post('/riwayat-laporan/{id}/status', [RiwayatLaporanController::class, 'updateStatus']); // Route khusus update status
+        Route::delete('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'destroy']);
 
         // User management (admin only)
         Route::delete('/user/{user}', [UserController::class, 'destroy']);

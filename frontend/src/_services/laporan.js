@@ -41,11 +41,13 @@ export const deleteLaporan = async (id) => {
 };
 
 export const getAllLaporan = async () => {
-    try {
-        const response = await API.get("/laporan");
-        return response.data;
-    } catch (error) {
-        console.error("Gagal mengambil semua laporan:", error);
-        throw error;
-    }
+  try {
+    const response = await API.get("/laporan");
+    console.log("RESPON LAPORAN:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Gagal mengambil semua laporan:", error);
+    throw error;
+  }
 };
+

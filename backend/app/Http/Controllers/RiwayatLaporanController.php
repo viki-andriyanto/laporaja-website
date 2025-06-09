@@ -4,192 +4,137 @@ namespace App\Http\Controllers;
 
 use App\Models\RiwayatLaporan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class RiwayatLaporanController extends Controller
 {
+    // Ambil semua data riwayat laporan
     public function index()
     {
-        try {
-            $riwayatLaporan = RiwayatLaporan::with(['user', 'laporan', 'surat'])->get();
-            return response()->json([
-                'success' => true,
-                'data' => $riwayatLaporan
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error retrieving riwayat laporan data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $riwayat
+        ]);
     }
 
+    // Ambil detail riwayat laporan
     public function show($id)
     {
-        try {
-            $riwayatLaporan = RiwayatLaporan::with(['user', 'laporan', 'surat'])->find($id);
-            
-            if (!$riwayatLaporan) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Riwayat laporan not found'
-                ], 404);
-            }
+        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat'])->find($id);
 
-            return response()->json([
-                'success' => true,
-                'data' => $riwayatLaporan
-            ], 200);
-        } catch (\Exception $e) {
+        if (!$riwayat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error retrieving riwayat laporan',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Riwayat laporan tidak ditemukan'
+            ], 404);
         }
+
+        return response()->json([
+            'success' => true,
+            'data' => $riwayat
+        ]);
     }
 
+    // Buat riwayat laporan baru
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'jenis_surat' => 'required|in:laporan,surat',
             'tanggal' => 'required|date',
-            'judul_lapor' => 'required|string|max:200',
+            'judul_lapor' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
+            'komentar' => 'nullable|string',
+            'gambar' => 'nullable|string',
             'users_user_id' => 'required|exists:users,id',
-            'laporan_laporan_id' => 'nullable|exists:laporan,laporan_id',
-            'surat_surat_id' => 'nullable|exists:surat,surat_id'
+            'laporan_laporan_id' => 'nullable|exists:laporans,laporan_id',
+            'surat_surat_id' => 'nullable|exists:surats,surat_id'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $riwayat = RiwayatLaporan::create($request->all());
 
-        // Upload gambar jika ada
-        if ($request->hasFile('gambar')) {
-            $gambar = $request->file('gambar');
-            $gambarPath = $gambar->store('riwayat_laporan', 'public');
-            $data['gambar'] = $gambarPath;
-        }
-
-        try {
-            // Ambil data dari request dan set status default
-            $data = $request->all();
-            $data['status'] = 'perlu ditinjau'; // Status otomatis untuk user baru
-            
-            $riwayatLaporan = RiwayatLaporan::create($data);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Riwayat laporan created successfully',
-                'data' => $riwayatLaporan
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error creating riwayat laporan',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat laporan berhasil dibuat',
+            'data' => $riwayat
+        ], 201);
     }
 
-    public function update(Request $request, RiwayatLaporan $riwayatLaporan)
+    // Update riwayat laporan
+    public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'jenis_surat' => 'sometimes|required|in:laporan,surat',
-            'tanggal' => 'sometimes|required|date',
-            'judul_lapor' => 'sometimes|required|string|max:200',
-            'deskripsi' => 'sometimes|required|string',
-            'gambar' => 'nullable|string|max:100',
-            'users_user_id' => 'sometimes|required|exists:users,id',
-            'laporan_laporan_id' => 'nullable|exists:laporan,laporan_id',
-            'surat_surat_id' => 'nullable|exists:surat,surat_id'
+        $request->validate([
+            'status' => 'sometimes|in:perlu ditinjau,dalam proses,selesai,ditolak',
+            'komentar' => 'sometimes|nullable|string'
         ]);
 
-        if ($validator->fails()) {
+        $riwayat = RiwayatLaporan::find($id);
+
+        if (!$riwayat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Riwayat laporan tidak ditemukan'
+            ], 404);
         }
 
-        try {
-            // Exclude status from regular update - hanya admin yang bisa update status
-            $data = $request->except('status');
-            $riwayatLaporan->update($data);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Riwayat laporan updated successfully',
-                'data' => $riwayatLaporan
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating riwayat laporan',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $riwayat->update($request->only(['status', 'komentar']));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat laporan berhasil diperbarui',
+            'data' => $riwayat
+        ]);
     }
 
-    // Method khusus untuk admin update status
-    public function updateStatus(Request $request, RiwayatLaporan $riwayatLaporan)
+    // Update status riwayat laporan
+    public function updateStatus(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:dalam proses,perlu ditinjau,selesai,ditolak',
-            'komentar' => 'required|string'
+        $request->validate([
+            'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
+            'komentar' => 'nullable|string'
         ]);
 
-        if ($validator->fails()) {
+        $riwayat = RiwayatLaporan::find($id);
+
+        if (!$riwayat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Riwayat laporan tidak ditemukan'
+            ], 404);
         }
 
-        try {
-            $riwayatLaporan->update([
-                'status' => $request->status,
-                'komentar' => $request->komentar ?? $riwayatLaporan->komentar
-            ]);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Status updated successfully',
-                'data' => $riwayatLaporan
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating status',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $riwayat->update([
+            'status' => $request->status,
+            'komentar' => $request->komentar
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status riwayat laporan berhasil diperbarui',
+            'data' => $riwayat
+        ]);
     }
 
-    public function destroy(RiwayatLaporan $riwayatLaporan)
+    // Hapus riwayat laporan
+    public function destroy($id)
     {
-        try {
-            $riwayatLaporan->delete();
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Riwayat laporan deleted successfully'
-            ], 200);
-        } catch (\Exception $e) {
+        $riwayat = RiwayatLaporan::find($id);
+
+        if (!$riwayat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting riwayat laporan',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Riwayat laporan tidak ditemukan'
+            ], 404);
         }
+
+        $riwayat->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat laporan berhasil dihapus'
+        ]);
     }
 }

@@ -41,11 +41,12 @@ export const deleteSurat = async (id) => {
 };
 
 export const getAllSurat = async () => {
-    try {
-        const response = await API.get("/surat");
-        return response.data;
-    } catch (error) {
-        console.error("Gagal mengambil semua surat:", error);
-        throw error;
-    }
+  try {
+    const response = await API.get("/surat");
+    console.log("RESPON SURAT:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Gagal mengambil semua surat:", error);
+    throw error;
+  }
 };
