@@ -13,34 +13,16 @@ class SuratSeeder extends Seeder
      */
     public function run(): void
     {
-        $surats = [
+        $surat = [
             [
                 'jenis_surat' => 'keterangan',
-            ],
-            [
-                'jenis_surat' => 'pengantar',
-            ],
-            [
-                'jenis_surat' => 'keterangan',
-            ],
-            [
-                'jenis_surat' => 'pengantar',
-            ],
-            [
-                'jenis_surat' => 'pengantar',
-            ],
-            [
-                'jenis_surat' => 'keterangan',
-            ],
-            [
-                'jenis_surat' => 'pengantar',
             ],
             [
                 'jenis_surat' => 'pengantar',
             ],
         ];
 
-        foreach ($surats as $surat) {
+        foreach ($surat as $surat) {
             Surat::create($surat);
         }
     }

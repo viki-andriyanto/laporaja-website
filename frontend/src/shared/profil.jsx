@@ -161,9 +161,6 @@ export default function Profil() {
                         <div className="container px-0">
                             <div className="row g-2">
                                 <div className="col-6">
-                                    <button className="btn btn-primary w-100">Detail Profil</button>
-                                </div>
-                                <div className="col-6">
                                     <button 
                                         className="btn btn-primary w-100" 
                                         onClick={handleEditClick}
@@ -178,7 +175,7 @@ export default function Profil() {
                                 <div className="col-6">
                                     <button className="btn btn-primary w-100">Notifikasi</button>
                                 </div>
-                                <div className="col-12">
+                                <div className="col-6">
                                     <button className="btn btn-danger w-100" onClick={handleLogout}>Logout</button>
                                 </div>
                             </div>

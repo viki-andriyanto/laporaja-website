@@ -12,7 +12,7 @@ class LaporanSeeder extends Seeder
      */
     public function run(): void
     {
-        $laporans = [
+        $laporan = [
             [
                 'lokasi_kejadian' => 'Jl. Malioboro No. 15, Yogyakarta',
                 'tanggal_kejadian' => '2024-01-15 08:30:00',
@@ -55,7 +55,7 @@ class LaporanSeeder extends Seeder
             ],
         ];
 
-        foreach ($laporans as $laporan) {
+        foreach ($laporan as $laporan) {
             Laporan::create($laporan);
         }
     }

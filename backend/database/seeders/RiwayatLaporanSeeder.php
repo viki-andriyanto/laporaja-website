@@ -13,7 +13,7 @@ class RiwayatLaporanSeeder extends Seeder
      */
     public function run(): void
     {
-        $riwayatLaporans = [
+        $riwayatLaporan = [
             [
                 'jenis' => 'laporan',
                 'judul' => 'Jalan Berlubang di Merdeka',
@@ -64,7 +64,7 @@ class RiwayatLaporanSeeder extends Seeder
             ],
         ];
 
-        foreach ($riwayatLaporans as $riwayat) {
+        foreach ($riwayatLaporan as $riwayat) {
             RiwayatLaporan::create($riwayat);
         }
     }

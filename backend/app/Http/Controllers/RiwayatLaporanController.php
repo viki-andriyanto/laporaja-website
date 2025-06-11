@@ -45,16 +45,29 @@ class RiwayatLaporanController extends Controller
             'jenis' => 'required|in:laporan,surat',
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
+            'status' => 'nullable|in:perlu ditinjau,dalam proses,selesai,ditolak',
             'komentar' => 'nullable|string',
-            'file' => 'nullable|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,csv|max:20480',
             'kontak' => 'nullable|string',
-            'users_user_id' => 'required|exists:users,id',
-            'laporan_laporan_id' => 'nullable|exists:laporans,laporan_id',
-            'surat_surat_id' => 'nullable|exists:surats,surat_id'
+            'laporan_laporan_id' => 'nullable|exists:laporan,laporan_id',
+            'surat_surat_id' => 'nullable|exists:surat,surat_id'
         ]);
 
-        $riwayat = RiwayatLaporan::create($request->all());
+        // Ambil data dari request kecuali file dan users_user_id
+        $data = $request->except(['file', 'users_user_id']);
+
+        // Set users_user_id otomatis dari user yang sedang login
+        $data['users_user_id'] = auth('api')->id();
+
+        // Jika ada file yang diupload
+        if ($request->hasFile('file')) {
+            $uploadedFile = $request->file('file');
+            $filename = time() . '_' . $uploadedFile->getClientOriginalName();
+            $path = $uploadedFile->storeAs('uploads/riwayat', $filename, 'public');
+            $data['file'] = $path;
+        }
+
+        $riwayat = RiwayatLaporan::create($data);
 
         return response()->json([
             'success' => true,
