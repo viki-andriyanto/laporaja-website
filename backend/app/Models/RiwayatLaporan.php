@@ -29,7 +29,7 @@ class RiwayatLaporan extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tanggal' => 'datetime'
+        'created_at' => 'datetime'
     ];
 
     // Default values

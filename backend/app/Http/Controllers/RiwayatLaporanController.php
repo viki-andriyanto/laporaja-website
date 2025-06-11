@@ -11,7 +11,7 @@ class RiwayatLaporanController extends Controller
     public function index()
     {
         $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat'])
-            ->orderBy('tanggal', 'desc')
+            ->orderBy('created_at')
             ->get();
 
         return response()->json([
