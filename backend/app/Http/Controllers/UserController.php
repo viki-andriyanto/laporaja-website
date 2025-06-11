@@ -52,11 +52,20 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        // Tambahkan blok ini untuk tolak request jika ada nik
+        if ($request->has('nik')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'NIK tidak dapat diubah.'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
-            'nik' => 'sometimes|required|string|digits:16|unique:users,nik,' . $user->id,
             'nama_lengkap' => 'sometimes|required|string|max:255',
             'no_telepon' => 'sometimes|required|string|max:16',
-            'password' => 'sometimes|required|min:8|'
+            'tempat_tinggal' => 'sometimes|required|string|max:255',
+            'tanggal_lahir' => 'sometimes|required|date',
+            'jenis_kelamin' => 'sometimes|required|in:Laki-laki,Perempuan',
         ]);
 
         if ($validator->fails()) {
@@ -68,7 +77,9 @@ class UserController extends Controller
         }
 
         try {
-            $user->update($request->all());
+            // Pastikan nik tidak ikut diupdate
+            $data = $request->except('nik');
+            $user->update($data);
 
             return response()->json([
                 'success' => true,

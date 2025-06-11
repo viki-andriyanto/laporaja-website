@@ -13,8 +13,6 @@ class Surat extends Model
     protected $primaryKey = 'surat_id';
 
     protected $fillable = [
-        'judul_surat',
-        'keperluan_surat',
         'jenis_surat'
     ];
 

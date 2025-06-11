@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../../_services/auth';
-import backgroundImage from '../../assets/background.png';
+import backgroundImage from '../../assets/bg2.jpg';
 import logoImage from '../../assets/logo.png';
 
 export default function Login() {
@@ -13,56 +13,110 @@ export default function Login() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({
+    nik: '',
+    password: ''
+  });
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Clear validation error when user types
+    if (validationErrors[name]) {
+      setValidationErrors({
+        ...validationErrors,
+        [name]: ''
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    let isValid = true;
+
+    if (formData.nik.length !== 16) {
+      errors.nik = 'NIK harus 16 digit';
+      isValid = false;
+    }
+
+    if (formData.password.length < 8) {
+      errors.password = 'Password minimal 8 karakter';
+      isValid = false;
+    }
+
+    setValidationErrors(errors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (!validateForm()) {
+      return;
+    }
+  
     setIsLoading(true);
     setError('');
-
+  
     try {
       const response = await login({
         nik: formData.nik,
-        password: formData.password
+        password: formData.password,
       });
-    
-      // Simpan data user ke localStorage jika perlu
+  
       localStorage.setItem('user', JSON.stringify(response.user));
       localStorage.setItem('token', response.token);
-    
+  
       console.log('Login berhasil:', response);
-    
-      // Arahkan ke landing page
-      navigate('/');
+  
+      // Cek role atau flag admin
+      if (response.user.role === 'admin') {
+        navigate('/dashboard'); // arahkan ke dashboard admin
+      } else {
+        navigate('/'); // default dashboard user biasa
+      }
     } catch (error) {
       const msg = error.response?.data?.message || 'Login gagal. Periksa NIK dan password Anda.';
       setError(msg);
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
-      {/* Gambar perpustakaan */}
-      <div style={{
-        flex: 2,
+    <div
+      style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }} />
-
-      {/* Form login */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ width: '90%', maxWidth: '320px' }}>
-          <img src={logoImage} alt="Logo" style={{ width: 150, margin: '0 auto 50px', display: 'block' }} />
-          <h4 style={{ marginBottom: 20 }}>Log in</h4>
+        backgroundPosition: 'center',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'sans-serif',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '40px',
+          borderRadius: '12px',
+          width: '90%',
+          maxWidth: '360px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          textAlign: 'center',
+        }}
+      >
+        <img
+          src={logoImage}
+          alt="Logo"
+          style={{ width: 150, margin: '0 auto 50px', display: 'block' }}
+        />
+        <h4 style={{ marginBottom: 20 }}>Log in</h4>
           
           {error && (
             <div style={{ 
@@ -88,6 +142,11 @@ export default function Login() {
                 inputMode='numeric'
                 required
               />
+              {validationErrors.nik && (
+                <div style={{ color: 'red', fontSize: '12px', marginTop: '5px' }}>
+                  {validationErrors.nik}
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: 10 }}>
@@ -98,9 +157,13 @@ export default function Login() {
                 value={formData.password}
                 onChange={handleInputChange}
                 style={inputStyle}
-                maxLength={12}
                 required
               />
+              {validationErrors.password && (
+                <div style={{ color: 'red', fontSize: '12px', marginTop: '5px' }}>
+                  {validationErrors.password}
+                </div>
+              )}
             </div>
 
             <button 
@@ -125,9 +188,10 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
+
+// ... (keep the same style constants at the bottom)
 
 const inputStyle = {
   width: '100%',

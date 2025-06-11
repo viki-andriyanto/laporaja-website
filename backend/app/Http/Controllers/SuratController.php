@@ -29,7 +29,7 @@ class SuratController extends Controller
     {
         try {
             $surat = Surat::with('riwayatLaporan')->find($id);
-            
+
             if (!$surat) {
                 return response()->json([
                     'success' => false,
@@ -53,8 +53,6 @@ class SuratController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'judul_surat' => 'required|string|max:200',
-            'keperluan_surat' => 'required|string|max:255',
             'jenis_surat' => 'required|in:keterangan,pengantar,izin'
         ]);
 
@@ -68,7 +66,7 @@ class SuratController extends Controller
 
         try {
             $surat = Surat::create($request->all());
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Surat created successfully',
@@ -86,8 +84,6 @@ class SuratController extends Controller
     public function update(Request $request, Surat $surat)
     {
         $validator = Validator::make($request->all(), [
-            'judul_surat' => 'sometimes|required|string|max:200',
-            'keperluan_surat' => 'sometimes|required|string|max:255',
             'jenis_surat' => 'sometimes|required|in:keterangan,pengantar,izin'
         ]);
 
@@ -101,7 +97,7 @@ class SuratController extends Controller
 
         try {
             $surat->update($request->all());
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Surat updated successfully',
@@ -120,7 +116,7 @@ class SuratController extends Controller
     {
         try {
             $surat->delete();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Surat deleted successfully'

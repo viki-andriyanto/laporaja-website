@@ -1,26 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { getUserById } from '../_services/user';
+import { getCurrentUser } from '../_services/auth';
+import { updateUser } from '../_services/user'; // Changed to use user service
+import { useNavigate } from 'react-router-dom';
+import Header from './header';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 export default function Profil() {
-    const [userData, setUserData] = useState(null);
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editForm, setEditForm] = useState({
+        nama_lengkap: '',
+        no_telepon: '',
+        tempat_tinggal: '',
+        tanggal_lahir: '',
+        jenis_kelamin: ''
+    });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const userLocal = JSON.parse(localStorage.getItem('user'));
-                if (!userLocal || !userLocal.id) {
-                    setError('Pengguna tidak ditemukan. Silakan login.');
-                    setLoading(false);
-                    return;
+                const userData = JSON.parse(localStorage.getItem('user'));
+                if (userData) {
+                    setUser(userData);
+                    setEditForm({
+                        nama_lengkap: userData.nama_lengkap || '',
+                        no_telepon: userData.no_telepon || '',
+                        tempat_tinggal: userData.tempat_tinggal || '',
+                        tanggal_lahir: userData.tanggal_lahir ? 
+                            userData.tanggal_lahir.split('T')[0] : '',
+                        jenis_kelamin: userData.jenis_kelamin || ''
+                    });
+                } else {
+                    const res = await getCurrentUser();
+                    localStorage.setItem('user', JSON.stringify(res));
+                    setUser(res);
+                    setEditForm({
+                        nama_lengkap: res.nama_lengkap || '',
+                        no_telepon: res.no_telepon || '',
+                        tempat_tinggal: res.tempat_tinggal || '',
+                        tanggal_lahir: res.tanggal_lahir ? 
+                            res.tanggal_lahir.split('T')[0] : '',
+                        jenis_kelamin: res.jenis_kelamin || ''
+                    });
                 }
-
-                const data = await getUserById(userLocal.id);
-                setUserData(data);
             } catch (err) {
+                console.error("Gagal ambil data user:", err);
                 setError('Gagal mengambil data pengguna.');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -29,42 +57,208 @@ export default function Profil() {
         fetchUser();
     }, []);
 
-    if (loading) return <p className="text-center">Memuat data...</p>;
-    if (error) return <p className="text-danger text-center">{error}</p>;
+    const getInitials = (fullName) => {
+        if (!fullName) return '';
+        const names = fullName.trim().split(' ');
+        return names.length > 1
+            ? names[0][0] + names[1][0]
+            : names[0].substring(0, 2).toUpperCase();
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    };
+
+    const handleEditClick = () => {
+        setShowEditModal(true);
+    };
+
+    const handleEditClose = () => {
+        setShowEditModal(false);
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await updateUser(user.id, editForm);
+            setUser(response.data); // Asumsi response.data berisi data user terupdate
+            localStorage.setItem('user', JSON.stringify(response.data));
+            setShowEditModal(false);
+        } catch (error) {
+            console.error("Gagal memperbarui profil:", error);
+            setError('Gagal memperbarui profil. Silakan coba lagi.');
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
+
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Memuat data...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="alert alert-danger">{error}</div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="alert alert-warning">Data pengguna tidak ditemukan</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="container mt-5">
-            <div className="text-center">
-                <img
-                    src="https://via.placeholder.com/120"
-                    alt="Foto Profil"
-                    className="rounded-circle mb-3"
-                    style={{ width: '120px', height: '120px' }}
-                />
-                <h4>{userData.nama_lengkap}</h4>
-                <p>{userData.nik}</p>
+        <div className="bg-light min-vh-100">
+            <Header />
+
+            <div className="container py-5">
+                <div className="card shadow-lg mx-auto" style={{ maxWidth: '1000px', width: '100%' }}>
+                    <div className="card-body text-center">
+                        <div className="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-3" style={{ width: '80px', height: '80px', fontSize: '28px', fontWeight: 'bold' }}>
+                            {getInitials(user.nama_lengkap)}
+                        </div>
+                        <h4 className="card-title">{user.nama_lengkap || 'Nama Tidak Tersedia'}</h4>
+                        <p className="text-muted">{user.nik || 'NIK Tidak Tersedia'}</p>
+                        <hr />
+                        <div className="text-start px-3">
+                            <p className="card-text"><strong>Tempat Tinggal:</strong> {user.tempat_tinggal || 'Alamat Tidak Tersedia'}</p>
+                            <p className="card-text"><strong>Tanggal Lahir:</strong> {formatDate(user.tanggal_lahir) || 'Tanggal Lahir Tidak Tersedia'}</p>
+                            <p className="card-text"><strong>Jenis Kelamin:</strong> {user.jenis_kelamin || 'Jenis Kelamin Tidak Tersedia'}</p>
+                            <p className="card-text"><strong>Telepon:</strong> {user.no_telepon || 'Telepon Tidak Tersedia'}</p>
+                        </div>
+                    </div>
+
+                    <div className="card-footer bg-white">
+                        <div className="container px-0">
+                            <div className="row g-2">
+                                <div className="col-6">
+                                    <button className="btn btn-primary w-100">Detail Profil</button>
+                                </div>
+                                <div className="col-6">
+                                    <button 
+                                        className="btn btn-primary w-100" 
+                                        onClick={handleEditClick}
+                                        disabled={!user}
+                                    >
+                                        Edit Profil
+                                    </button>
+                                </div>
+                                <div className="col-6">
+                                    <button className="btn btn-primary w-100">Laporan Saya</button>
+                                </div>
+                                <div className="col-6">
+                                    <button className="btn btn-primary w-100">Notifikasi</button>
+                                </div>
+                                <div className="col-12">
+                                    <button className="btn btn-danger w-100" onClick={handleLogout}>Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <hr />
-            <div className="mb-3">
-                <strong>Tempat Tinggal</strong>
-                <p>{userData.alamat}</p>
-            </div>
-            <div className="mb-3">
-                <strong>Tanggal Lahir</strong>
-                <p>{userData.tanggal_lahir}</p>
-            </div>
-            <div className="mb-3">
-                <strong>Jenis Kelamin</strong>
-                <p>{userData.jenis_kelamin}</p>
-            </div>
-            <div className="mb-3">
-                <strong>No Telepon</strong>
-                <p>{userData.no_telepon}</p>
-            </div>
-            <div className="mb-3">
-                <strong>Email</strong>
-                <p>{userData.email}</p>
-            </div>
+
+            {/* Edit Profile Modal */}
+            <Modal show={showEditModal} onHide={handleEditClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Profil</Modal.Title>
+                </Modal.Header>
+                <Form onSubmit={handleSubmit}>
+                    <Modal.Body>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Nama Lengkap</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="nama_lengkap"
+                                value={editForm.nama_lengkap}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Nomor Telepon</Form.Label>
+                            <Form.Control
+                                type="tel"
+                                name="no_telepon"
+                                value={editForm.no_telepon}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Tempat Tinggal</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="tempat_tinggal"
+                                value={editForm.tempat_tinggal}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Tanggal Lahir</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="tanggal_lahir"
+                                value={editForm.tanggal_lahir}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Jenis Kelamin</Form.Label>
+                            <Form.Select
+                                name="jenis_kelamin"
+                                value={editForm.jenis_kelamin}
+                                onChange={handleInputChange}
+                            >
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleEditClose}>
+                            Batal
+                        </Button>
+                        <Button variant="primary" type="submit">
+                            Simpan Perubahan
+                        </Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal>
         </div>
     );
 }

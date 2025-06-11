@@ -22,7 +22,6 @@ export const register = async (data) => {
       nik: data.nik,
       nama_lengkap: data.namalengkap,
       no_telepon: data.noTelepon,
-      email: data.email,
       password: data.password,
     });
     return response.data;

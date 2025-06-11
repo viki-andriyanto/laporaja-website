@@ -1,7 +1,15 @@
-import { NavLink, Link } from "react-router-dom"; // ganti NavLink untuk active state
+import { NavLink, Link, useNavigate } from "react-router-dom"; // ganti NavLink untuk active state
 import { Dropdown } from "react-bootstrap";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/login');
+};
+
   return (
     <nav
       className="col-md-3 col-lg-2 d-md-block bg-dark text-white sidebar"
@@ -47,7 +55,7 @@ export default function Sidebar() {
             <Link
               className="nav-link text-danger"
               to="/login"
-              onClick={() => localStorage.removeItem("token")}
+              onClick={handleLogout}
             >
               <i className="bi bi-box-arrow-left me-2" /> Logout
             </Link>

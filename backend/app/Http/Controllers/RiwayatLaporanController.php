@@ -42,13 +42,13 @@ class RiwayatLaporanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'jenis_surat' => 'required|in:laporan,surat',
-            'tanggal' => 'required|date',
-            'judul_lapor' => 'required|string|max:255',
+            'jenis' => 'required|in:laporan,surat',
+            'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
             'komentar' => 'nullable|string',
-            'gambar' => 'nullable|string',
+            'file' => 'nullable|string',
+            'kontak' => 'nullable|string',
             'users_user_id' => 'required|exists:users,id',
             'laporan_laporan_id' => 'nullable|exists:laporans,laporan_id',
             'surat_surat_id' => 'nullable|exists:surats,surat_id'

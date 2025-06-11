@@ -15,43 +15,27 @@ class SuratSeeder extends Seeder
     {
         $surats = [
             [
-                'judul_surat' => 'Surat Keterangan Domisili',
-                'keperluan_surat' => 'Untuk keperluan administrasi kependudukan',
                 'jenis_surat' => 'keterangan',
             ],
             [
-                'judul_surat' => 'Surat Pengantar KTP',
-                'keperluan_surat' => 'Untuk mengurus pembuatan KTP baru',
                 'jenis_surat' => 'pengantar',
             ],
             [
-                'judul_surat' => 'Surat Keterangan Usaha',
-                'keperluan_surat' => 'Untuk mengurus izin usaha mikro',
                 'jenis_surat' => 'keterangan',
             ],
             [
-                'judul_surat' => 'Surat Izin Keramaian',
-                'keperluan_surat' => 'Untuk mengadakan acara pernikahan',
-                'jenis_surat' => 'izin',
-            ],
-            [
-                'judul_surat' => 'Surat Pengantar SKCK',
-                'keperluan_surat' => 'Untuk keperluan melamar pekerjaan',
                 'jenis_surat' => 'pengantar',
             ],
             [
-                'judul_surat' => 'Surat Keterangan Tidak Mampu',
-                'keperluan_surat' => 'Untuk mengurus beasiswa pendidikan',
+                'jenis_surat' => 'pengantar',
+            ],
+            [
                 'jenis_surat' => 'keterangan',
             ],
             [
-                'judul_surat' => 'Surat Izin Mendirikan Bangunan',
-                'keperluan_surat' => 'Untuk renovasi rumah',
-                'jenis_surat' => 'izin',
+                'jenis_surat' => 'pengantar',
             ],
             [
-                'judul_surat' => 'Surat Pengantar Nikah',
-                'keperluan_surat' => 'Untuk keperluan pernikahan di KUA',
                 'jenis_surat' => 'pengantar',
             ],
         ];

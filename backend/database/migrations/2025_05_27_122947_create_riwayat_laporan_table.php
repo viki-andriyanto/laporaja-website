@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::create('riwayat_laporan', function (Blueprint $table) {
             $table->bigIncrements('riwayat_id');
-            $table->enum('jenis_surat', ['laporan', 'surat']);
-            $table->dateTime('tanggal');
-            $table->string('judul_lapor', 200);
+            $table->enum('jenis', ['laporan', 'surat']);
+            $table->string('judul', 200);
             $table->text('deskripsi');
             $table->enum('status', ['dalam proses', 'perlu ditinjau', 'selesai', 'ditolak']);
             $table->text('komentar')->nullable();
-            $table->string('gambar', 100)->nullable();
+            $table->string('file', 100)->nullable();
+            $table->string('kontak', 100)->nullable();
             $table->unsignedBigInteger('users_user_id');
             $table->unsignedBigInteger('laporan_laporan_id')->nullable();
             $table->unsignedBigInteger('surat_surat_id')->nullable();

@@ -13,13 +13,13 @@ class RiwayatLaporan extends Model
     protected $primaryKey = 'riwayat_id';
 
     protected $fillable = [
-        'jenis_surat',
-        'tanggal',
-        'judul_lapor',
+        'jenis',
+        'judul',
         'deskripsi',
         'status',
         'komentar',
-        'gambar',
+        'file',
+        'kontak',
         'users_user_id',
         'laporan_laporan_id',
         'surat_surat_id'
