@@ -10,7 +10,9 @@ class RiwayatLaporanController extends Controller
     // Ambil semua data riwayat laporan
     public function index()
     {
-        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->get();
+        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
 
         return response()->json([
             'success' => true,

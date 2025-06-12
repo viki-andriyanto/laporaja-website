@@ -28,6 +28,10 @@ class RiwayatLaporan extends Model
     // Attributes yang dilindungi dari mass assignment kecuali melalui method khusus
     protected $guarded = [];
 
+    protected $casts = [
+        'tanggal' => 'datetime'
+    ];
+
     // Default values
     protected $attributes = [
         'status' => 'perlu ditinjau'

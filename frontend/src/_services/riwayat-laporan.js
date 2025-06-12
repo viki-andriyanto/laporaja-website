@@ -22,11 +22,23 @@ export const getRiwayatById = async (id) => {
 
 export const createRiwayat = async (data) => {
   try {
-    const response = await API.post("/riwayat-laporan", data);
-    return response.data.data;
+    const response = await API.post("/riwayat-laporan", data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message || "Data berhasil disimpan"
+    };
   } catch (error) {
     console.error("Gagal membuat riwayat laporan:", error);
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message,
+      status: error.response?.status
+    };
   }
 };
 

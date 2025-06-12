@@ -8,7 +8,7 @@ import {
   Image,
   ButtonGroup,
 } from "react-bootstrap";
-import { Check2, X, Trash, Eye } from "react-bootstrap-icons";
+import { Check2, X, Trash, Eye, ClipboardData } from "react-bootstrap-icons";
 import Sidebar from "../../../shared/sidebar";
 import { isValid, parseISO, format } from "date-fns";
 import {
@@ -66,17 +66,17 @@ const ModalDetailRiwayat = ({ show, item, onHide, onUpdate }) => {
       <Modal.Body>
         {/* Info ringkas */}
         <p className="mb-1">
-          <strong>Tanggal:</strong> {formatTanggal(item.tanggal)}
+          <strong>Tanggal:</strong> {formatTanggal(item.created_at)}
         </p>
         <p className="mb-1">
-          <strong>Jenis:</strong> {item.jenis_surat}
+          <strong>Jenis:</strong> {item.jenis}
         </p>
         <p className="mb-3">
           <strong>Status:</strong> {getStatusBadge(item.status)}
         </p>
 
         {/* Judul & Deskripsi */}
-        <h4 className="fw-bold">{item.judul_lapor}</h4>
+        <h4 className="fw-bold">{item.judul}</h4>
         <Form.Group className="mb-4">
           <Form.Control
             as="textarea"
@@ -87,10 +87,10 @@ const ModalDetailRiwayat = ({ show, item, onHide, onUpdate }) => {
         </Form.Group>
 
         {/* Gambar (opsional) */}
-        {item.gambar && (
+        {item.file && (
           <div className="text-center mb-4">
             <Image
-              src={`http://localhost:8000/storage/${item.gambar}`}
+              src={`http://localhost:8000/storage/${item.file}`}
               fluid
               rounded
               style={{ maxHeight: 300 }}
@@ -156,7 +156,30 @@ const ModalDetailRiwayat = ({ show, item, onHide, onUpdate }) => {
 /*  Halaman utama                                                              */
 /* -------------------------------------------------------------------------- */
 
+const ModalKonfirmasiHapus = ({ show, onHide, onConfirm }) => {
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton className="bg-danger text-white">
+        <Modal.Title>Konfirmasi Hapus</Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="text-center">
+        <p className="fs-5 fw-semibold">Yakin nih mau dihapus datanya?</p>
+      </Modal.Body>
+      <Modal.Footer className="justify-content-center">
+        <Button variant="secondary" onClick={onHide}>
+          Batal
+        </Button>
+        <Button variant="danger" onClick={onConfirm}>
+          Hapus Sekarang
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
+
 const KelolaLaporan = () => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState(null);
   const [riwayatData, setRiwayatData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -217,20 +240,29 @@ const KelolaLaporan = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Yakin hapus data ini?")) return;
+  const confirmDelete = (id) => {
+    setIdToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
     try {
-      await deleteRiwayat(id);
-      setRiwayatData((prev) => prev.filter((it) => it.riwayat_id !== id));
+      await deleteRiwayat(idToDelete);
+      setRiwayatData((prev) =>
+        prev.filter((it) => it.riwayat_id !== idToDelete)
+      );
     } catch (err) {
       console.error(err);
       alert("Gagal menghapus data.");
+    } finally {
+      setShowDeleteModal(false);
+      setIdToDelete(null);
     }
   };
 
   /* -------------------------- filter & paging --------------------------- */
   const filtered = riwayatData.filter((it) =>
-    [it.judul_lapor, it.status, it.jenis_surat, it.tanggal]
+    [it.judul, it.status, it.jenis, it.created_at]
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
@@ -257,29 +289,57 @@ const KelolaLaporan = () => {
     );
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*  Halaman utama (potongan render)                                            */
+  /* -------------------------------------------------------------------------- */
+
+  const totalAll = riwayatData.length; // keseluruhan
+  const totalFiltered = filtered.length; // setelah disaring search
+
   return (
     <div className="container-fluid">
       <div className="row">
         <Sidebar />
 
-        {/* -------------------------------- MAIN --------------------------- */}
+        {/* ----------------------------- MAIN -------------------------------- */}
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-          {/* header */}
-          <div className="d-flex justify-content-between align-items-center border-bottom mb-4">
-            <h2>Kelola Riwayat Laporan &amp; Surat</h2>
-            <input
-              className="form-control w-auto"
-              placeholder="Cari…"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          {/* ======= Header besar (tetap) ======= */}
+          <div className="d-flex align-items-center gap-2 border-bottom mb-4">
+            <i className="bi bi-clock-fill fs-3" />
+            <h1 className="h2 mb-0">Kelola Riwayat Laporan &amp; Surat</h1>
           </div>
 
-          {/* tabel */}
+          {/* ======= Kotak Cari + Total ======= */}
+          <div className="card shadow-sm mb-3">
+            <div className="card-body py-3">
+              <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                {/* Search input */}
+                <div className="flex-grow-1">
+                  <Form.Control
+                    type="search"
+                    placeholder="Cari laporan, status, tanggal…"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+
+                {/* Kotak total */}
+                <div className="d-flex align-items-center bg-primary text-white rounded px-3 py-2 shadow-sm">
+                  <ClipboardData className="me-2" />
+                  <span className="fw-semibold">
+                    Total:&nbsp;{totalFiltered}&nbsp;dari&nbsp;{totalAll}
+                    &nbsp;laporan masuk
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ======= Tabel ======= */}
           <div className="card shadow-sm">
-            <div className="card-body table-responsive">
+            <div className="card-body table-responsive rounded px-3 py-2">
               <Table hover>
-                <thead className="table-dark">
+                <thead className="table-dark rounded px-3 py-2">
                   <tr>
                     <th>Tanggal</th>
                     <th>Jenis</th>
@@ -289,22 +349,24 @@ const KelolaLaporan = () => {
                     <th className="text-center">Aksi</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {currentItems.length ? (
                     currentItems.map((it) => (
                       <tr key={it.riwayat_id}>
-                        <td>{formatTanggal(it.tanggal)}</td>
+                        <td>{formatTanggal(it.created_at)}</td>
+
                         <td>
                           <Badge
-                            bg={
-                              it.jenis_surat === "laporan" ? "info" : "success"
-                            }
+                            bg={it.jenis === "laporan" ? "info" : "success"}
                           >
-                            {it.jenis_surat.toUpperCase()}
+                            {it.jenis.toUpperCase()}
                           </Badge>
                         </td>
-                        <td>{it.judul_lapor}</td>
+
+                        <td>{it.judul}</td>
                         <td>{getStatusBadge(it.status)}</td>
+
                         <td>
                           <Form.Control
                             size="sm"
@@ -319,6 +381,7 @@ const KelolaLaporan = () => {
                             }
                           />
                         </td>
+
                         <td className="text-center">
                           <Button
                             variant="outline-primary"
@@ -329,6 +392,7 @@ const KelolaLaporan = () => {
                           >
                             <Eye />
                           </Button>
+
                           <Button
                             variant="outline-success"
                             size="sm"
@@ -344,6 +408,7 @@ const KelolaLaporan = () => {
                           >
                             <Check2 />
                           </Button>
+
                           <Button
                             variant="outline-danger"
                             size="sm"
@@ -359,11 +424,12 @@ const KelolaLaporan = () => {
                           >
                             <X />
                           </Button>
+
                           <Button
                             variant="outline-danger"
                             size="sm"
                             title="Hapus"
-                            onClick={() => handleDelete(it.riwayat_id)}
+                            onClick={() => confirmDelete(it.riwayat_id)}
                           >
                             <Trash />
                           </Button>
@@ -372,7 +438,10 @@ const KelolaLaporan = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="text-center py-4">
+                      <td
+                        colSpan="6"
+                        className="bi bi-clock-history me-2 text-center py-4"
+                      >
                         Tidak ada data ditemukan.
                       </td>
                     </tr>
@@ -380,7 +449,7 @@ const KelolaLaporan = () => {
                 </tbody>
               </Table>
 
-              {/* pagination sederhana */}
+              {/* ======= Pagination ======= */}
               {totalPages > 1 && (
                 <nav className="d-flex justify-content-center">
                   <ul className="pagination mb-0">
@@ -406,16 +475,25 @@ const KelolaLaporan = () => {
               )}
             </div>
           </div>
+
+          {/* Modal untuk konfirmasi hapus */}
+          <ModalKonfirmasiHapus
+            show={showDeleteModal}
+            onHide={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteConfirmed}
+          />
+
         </main>
       </div>
 
-      {/* ── Modal detail ───────────────────────────────────────────── */}
+      {/* -- Modal detail -- */}
       <ModalDetailRiwayat
         show={showModal}
         item={selectedItem}
         onHide={closeModal}
         onUpdate={handleStatusChange}
       />
+      
     </div>
   );
 };
