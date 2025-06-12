@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -10,6 +10,8 @@ import {
   Legend,
 } from "chart.js";
 import Sidebar from "../../shared/sidebar";
+import { getAllRiwayat } from "../../_services/riwayat-laporan";
+import { Modal, Button, Form, Image } from "react-bootstrap";
 
 // Register Chart.js components
 ChartJS.register(
@@ -22,75 +24,82 @@ ChartJS.register(
 );
 
 const AdminDashboard = () => {
-  // Data dummy
-  const reports = [
-    {
-      title: "Perbaikan Saluran Air",
-      date: "25-06-2025",
-      status: "Dalam Proses",
-    },
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-    {
-      title: "Laporan kerusakan jalan di Jalan Merdeka",
-      date: "12-01-2025",
-      status: "Dalam Proses",
-    },
+  const handleViewDetail = (report) => {
+    setSelectedReport(report);
+    setShowModal(true);
+  };
 
-    {
-      title: "Pengaduan sampah menumpuk di RT 05",
-      date: "13-01-2025",
-      status: "Perlu Ditinjau",
-    },
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedReport(null);
+  };
 
-    {
-      title: "Kurangnya Rambu Lalu Lintas",
-      date: "03-07-2025",
-      status: "Perlu Ditinjau",
-    },
+  // Fetch data dari database
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+  
+        const riwayatData = await getAllRiwayat().catch(err => {
+          console.error("Error fetching riwayat:", err);
+          return [];
+        });
+  
+        setReports(Array.isArray(riwayatData) ? riwayatData : []);
+      } catch (err) {
+        console.error("Error in fetchData:", err);
+        setError("Gagal memuat data. Periksa koneksi server.");
+        setReports([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
 
-    {
-      title: "Laporan fasilitas taman rusak",
-      date: "15-01-2025",
-      status: "Selesai",
-    },
+  // Loading state
+  if (loading) {
+    return (
+      <div className="container-fluid vh-100">
+        <div className="row h-100">
+          <Sidebar />
+          <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 bg-light">
+            <div className="d-flex justify-content-center align-items-center h-100">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
-    {
-      title: "Perbaikan Trotoar Jln.Urip",
-      date: "05-07-2025",
-      status: "Selesai",
-    },
+  // Hitung statistik laporan dengan safe fallbacks
+  const totalLaporan = Array.isArray(reports) ? reports.length : 0;
+  const totalUsers = Array.isArray(reports)
+  ? new Set(reports.map(r => r?.users_user_id).filter(Boolean)).size
+  : 0;
+  const laporanSelesai = Array.isArray(reports) 
+    ? reports.filter(report => report?.status === "Selesai").length 
+    : 0;
+  const persentaseSelesai = totalLaporan > 0 ? ((laporanSelesai / totalLaporan) * 100).toFixed(0) : 0;
 
-    { 
-      title: "Pipa Air Bocor", 
-      date: "06-07-2025", 
-      status: "Selesai" 
-    },
-    
-    {
-      title: "Permohonan perbaikan drainase di komplek Permai",
-      date: "14-01-2025",
-      status: "Ditolak",
-    },
-
-    {
-      title: "Permohonan pemasangan rambu lalu lintas",
-      date: "17-01-2025",
-      status: "Ditolak",
-    },
-  ];
-
-  // Hitung statistik laporan
-  const totalLaporan = reports.length;
-  const laporanSelesai = reports.filter(
-    (report) => report.status === "Selesai"
-  ).length;
-  const persentaseSelesai = ((laporanSelesai / totalLaporan) * 100).toFixed(0);
-
-  // Data untuk grafik
-  const statusCounts = reports.reduce((acc, report) => {
-    acc[report.status] = (acc[report.status] || 0) + 1;
+  // Data untuk grafik - hitung berdasarkan status dengan safe handling
+  const statusCounts = Array.isArray(reports) ? reports.reduce((acc, report) => {
+    if (report && report.status) {
+      acc[report.status] = (acc[report.status] || 0) + 1;
+    }
     return acc;
-  }, {});
+  }, {}) : {};
 
   const chartData = {
     labels: Object.keys(statusCounts),
@@ -100,14 +109,14 @@ const AdminDashboard = () => {
         data: Object.values(statusCounts),
         backgroundColor: [
           "rgba(54, 162, 235, 0.7)", // Dalam Proses
-          "rgba(255, 206, 86, 0.7)", // Perlu Ditinjau
           "rgba(75, 192, 192, 0.7)", // Selesai
+          "rgba(255, 206, 86, 0.7)", // Perlu Ditinjau
           "rgba(255, 99, 132, 0.7)", // Ditolak
         ],
         borderColor: [
           "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
           "rgba(75, 192, 192, 1)",
+          "rgba(255, 206, 86, 1)",
           "rgba(255, 99, 132, 1)",
         ],
         borderWidth: 1,
@@ -126,8 +135,255 @@ const AdminDashboard = () => {
         text: "Distribusi Status Laporan",
       },
     },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
   };
 
+  // Format tanggal untuk tampilan
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime())
+        ? "-"
+        : date.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+    } catch {
+      return "-";
+    }
+  };
+  
+  // Urutkan laporan berdasarkan created_at (terbaru di atas)
+  const sortedReports = Array.isArray(reports)
+    ? [...reports]
+        .filter((r) => r?.created_at) // filter yang tidak punya tanggal
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 10)
+    : [];
+
+    const ModalDetailRiwayat = ({ show, laporan, onHide }) => {
+      const [activeIndex, setActiveIndex] = useState(0);
+    
+      // Data sudah termasuk relasi dari backend (with['laporan', 'surat', 'user'])
+      // Jadi tidak perlu fetch tambahan
+    
+      const getBadgeStatus = (status) => {
+        if (!status) return <span className="badge bg-secondary">Tidak diketahui</span>;
+        const color = getStatusColor(status);
+        return <span className={`badge bg-${color}`}>{status}</span>;
+      };
+    
+      // Helper function to get reporter NIK
+      const getReporterNIK = (laporan) => {
+        // Try different possible paths for NIK
+        return laporan?.users?.nik || 
+               laporan?.user?.nik || 
+               laporan?.users?.NIK || 
+               laporan?.user?.NIK || 
+               'NIK tidak tersedia';
+      };
+    
+      // Helper function to get category name
+      const getCategoryName = (laporan) => {
+        // Berdasarkan struktur database: riwayat_laporan -> laporan -> kategori
+        // Foreign key: laporan.kategori_kategori_id -> kategori.kategori_id
+        return laporan?.laporan?.kategori?.nama_kategori || 
+               'Kategori tidak diketahui';
+      };
+
+      
+    
+      return (
+        <Modal show={show} onHide={onHide} centered size="lg">
+          <Modal.Header closeButton className="bg-primary text-white">
+            <Modal.Title>Detail {laporan?.laporan ? 'Laporan' : 'Surat'}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="mb-4">
+              <h4 className="fw-bold">{laporan?.judul || (laporan?.laporan?.judul || laporan?.surat?.judul)}</h4>
+              <p className="text-muted mb-3">Tanggal Dibuat: {formatDate(laporan?.created_at)}</p>
+    
+              <div className="row mb-3">
+                <div className="col-md-6">
+                  <h6 className="fw-bold">Status:</h6>
+                  {getBadgeStatus(laporan?.status)}
+                </div>
+                <div className="col-md-6">
+                  <h6 className="fw-bold">Pelapor:</h6>
+                  <p className="mb-0">{getReporterNIK(laporan)}</p>
+                </div>
+              </div>
+    
+              {/* Detail khusus Laporan */}
+              {laporan?.laporan && (
+                <>
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <h6 className="fw-bold">Kategori:</h6>
+                      <p className="mb-0">{getCategoryName(laporan)}</p>
+                    </div>
+                    <div className="col-md-6">
+                      <h6 className="fw-bold">Lokasi Kejadian:</h6>
+                      <p className="mb-0">{laporan.laporan.lokasi_kejadian || '-'}</p>
+                    </div>
+                  </div>
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <h6 className="fw-bold">Tanggal Kejadian:</h6>
+                      <p className="mb-0">{formatDate(laporan.laporan.tanggal_kejadian) || '-'}</p>
+                    </div>
+                    <div className="col-md-6">
+                      <h6 className="fw-bold">Kontak:</h6>
+                      <p className="mb-0">{laporan.kontak || '-'}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+    
+              {/* Detail khusus Surat */}
+              {laporan?.surat && (
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <h6 className="fw-bold">Jenis Surat:</h6>
+                    <p className="mb-0">{laporan.surat.jenis_surat || 'Tidak diketahui'}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <h6 className="fw-bold">Kontak:</h6>
+                    <p className="mb-0">{laporan.kontak || '-'}</p>
+                  </div>
+                </div>
+              )}
+    
+                <Form.Group className="mb-4">
+                  <Form.Label className="fw-bold">Deskripsi</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    value={laporan?.isi || laporan?.deskripsi || ""}
+                    readOnly
+                    className="bg-light"
+                  />
+                </Form.Group>
+    
+              <Form.Group className="mb-4">
+                <Form.Label className="fw-bold">Media</Form.Label>
+                {(() => {
+                  // Helper function to get media files
+                  const getMediaFiles = (laporan) => {
+                    // Cek berbagai kemungkinan struktur data media
+                    if (laporan?.media && Array.isArray(laporan.media) && laporan.media.length > 0) {
+                      return laporan.media;
+                    }
+                    
+                    // Cek field file dari database
+                    if (laporan?.file) {
+                      // Jika file adalah string (single file)
+                      if (typeof laporan.file === 'string') {
+                        return [laporan.file];
+                      }
+                      // Jika file adalah array
+                      if (Array.isArray(laporan.file)) {
+                        return laporan.file;
+                      }
+                    }
+                    
+                    // Cek field files (plural)
+                    if (laporan?.files && Array.isArray(laporan.files)) {
+                      return laporan.files;
+                    }
+                    
+                    return null;
+                  };
+    
+                  const mediaFiles = getMediaFiles(laporan);
+                  
+                  // Debug log untuk melihat struktur data
+                  console.log('Media files:', mediaFiles);
+                  console.log('Laporan file field:', laporan?.file);
+                  
+                  return mediaFiles && mediaFiles.length > 0 ? (
+                    <div className="media-gallery">
+                      <div className="mb-3 text-center">
+                        <Image
+                          src={mediaFiles[activeIndex]}
+                          alt={`Media ${activeIndex + 1}`}
+                          fluid
+                          className="rounded"
+                          style={{ maxHeight: "300px" }}
+                          onError={(e) => {
+                            console.log('Image load error:', e.target.src);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <div className="d-flex flex-wrap gap-2 justify-content-center">
+                        {mediaFiles.map((media, index) => (
+                          <div
+                            key={index}
+                            className={`thumbnail ${activeIndex === index ? "active" : ""}`}
+                            onClick={() => setActiveIndex(index)}
+                            style={{
+                              cursor: "pointer",
+                              border: activeIndex === index ? "3px solid #0d6efd" : "1px solid #dee2e6",
+                            }}
+                          >
+                            <Image
+                              src={media}
+                              alt={`Thumbnail ${index + 1}`}
+                              width={80}
+                              height={60}
+                              className="object-fit-cover rounded"
+                              onError={(e) => {
+                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA4MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yNSAyMEg1NVY0MEgyNVYyMFoiIGZpbGw9IiNEREREREQiLz4KPC9zdmc+';
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-3 bg-light rounded">
+                      <i className="bi bi-image fs-1 text-muted"></i>
+                      <p className="mt-2 mb-0">Tidak ada media yang disertakan</p>
+                      {laporan?.file && (
+                        <small className="text-muted d-block">
+                          File: {laporan.file}
+                        </small>
+                      )}
+                    </div>
+                  );
+                })()}
+              </Form.Group>
+    
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-bold">Komentar</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={laporan?.komentar || ""}
+                  readOnly
+                  className="bg-light"
+                />
+              </Form.Group>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={onHide}>
+              Tutup
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      );
+    };
   return (
     <div className="container-fluid vh-100">
       <div className="row h-100">
@@ -136,16 +392,40 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 bg-light">
+          {/* Error Alert */}
+          {error && (
+            <div className="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              {error}
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => setError(null)}
+                aria-label="Close"
+              ></button>
+            </div>
+          )}
+
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="mb-0">Selamat Datang, Rizal</h2>
+            <h2 className="mb-0">Dashboard Admin</h2>
             <div className="d-flex gap-3">
-              <div className="bg-primary text-white p-2 rounded">
-                <small>Total Laporan</small>
-                <h3 className="mb-0">9</h3>
+              <div className="bg-primary text-white p-3 rounded shadow-sm">
+                <div className="d-flex align-items-center">
+                  <div>
+                    <small className="opacity-75">Total Laporan</small>
+                    <h3 className="mb-0 fw-bold">{totalLaporan}</h3>
+                  </div>
+                  <i className="bi bi-file-text-fill ms-3 fs-2 opacity-75"></i>
+                </div>
               </div>
-              <div className="bg-success text-white p-2 rounded">
-                <small>Pengguna</small>
-                <h3 className="mb-0">12</h3>
+              <div className="bg-success text-white p-3 rounded shadow-sm">
+                <div className="d-flex align-items-center">
+                  <div>
+                    <small className="opacity-75">Total Pengguna</small>
+                    <h3 className="mb-0 fw-bold">{totalUsers}</h3>
+                  </div>
+                  <i className="bi bi-people-fill ms-3 fs-2 opacity-75"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -153,43 +433,64 @@ const AdminDashboard = () => {
           {/* Statistik Utama */}
           <div className="row mb-4">
             <div className="col-md-8">
-              <div className="card h-100">
+              <div className="card h-100 shadow-sm">
                 <div className="card-body">
-                  <Bar data={chartData} options={chartOptions} />
+                  {Object.keys(statusCounts).length > 0 ? (
+                    <Bar data={chartData} options={chartOptions} />
+                  ) : (
+                    <div className="d-flex flex-column justify-content-center align-items-center h-100 py-5">
+                      <i className="bi bi-bar-chart-fill text-muted mb-3" style={{fontSize: '3rem'}}></i>
+                      <p className="text-muted mb-0">Belum ada data laporan untuk ditampilkan</p>
+                      <small className="text-muted">Grafik akan muncul setelah ada laporan masuk</small>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="col-md-4">
-              <div className="card h-100">
+              <div className="card h-100 shadow-sm">
                 <div className="card-body">
-                  <h5 className="card-title">Progress Laporan</h5>
-                  <div className="progress mb-3" style={{ height: "30px" }}>
+                  <h5 className="card-title d-flex align-items-center">
+                    <i className="bi bi-graph-up me-2 text-success"></i>
+                    Progress Laporan
+                  </h5>
+                  <div className="progress mb-3" style={{ height: "25px" }}>
                     <div
-                      className="progress-bar bg-success"
+                      className="progress-bar bg-success progress-bar-striped"
                       role="progressbar"
                       style={{ width: `${persentaseSelesai}%` }}
                     >
                       {persentaseSelesai}%
                     </div>
                   </div>
-                  <div className="list-group">
-                    {Object.entries(statusCounts).map(([status, count]) => (
-                      <div
-                        key={status}
-                        className="list-group-item d-flex justify-content-between align-items-center"
-                      >
-                        <span
-                          className={`badge bg-${getStatusColor(status)} me-2`}
+                  <div className="list-group list-group-flush">
+                    {Object.keys(statusCounts).length > 0 ? (
+                      Object.entries(statusCounts).map(([status, count]) => (
+                        <div
+                          key={status}
+                          className="list-group-item d-flex justify-content-between align-items-center px-0 border-0"
                         >
-                          &nbsp;
-                        </span>
-                        {status}
-                        <span className="badge bg-primary rounded-pill">
-                          {count}
-                        </span>
+                          <div className="d-flex align-items-center">
+                            <span
+                              className={`badge bg-${getStatusColor(status)} me-2`}
+                              style={{width: '12px', height: '12px'}}
+                            >
+                              &nbsp;
+                            </span>
+                            {status}
+                          </div>
+                          <span className="badge bg-primary rounded-pill">
+                            {count}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="list-group-item text-center text-muted px-0 border-0 py-4">
+                        <i className="bi bi-inbox mb-2 d-block" style={{fontSize: '2rem'}}></i>
+                        Belum ada data status
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </div>
@@ -197,36 +498,73 @@ const AdminDashboard = () => {
           </div>
 
           {/* Laporan Terbaru */}
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Laporan Terbaru</h5>
+          <div className="card shadow-sm">
+            <div className="card-header bg-white border-bottom">
+              <h5 className="mb-0 d-flex align-items-center">
+                <i className="bi bi-clock-history me-2 text-primary"></i>
+                Laporan Terbaru
+              </h5>
             </div>
             <div className="card-body p-0">
               <div className="table-responsive">
                 <table className="table table-hover mb-0">
                   <thead className="bg-light">
                     <tr>
-                      <th>Judul Laporan</th>
-                      <th>Tanggal</th>
-                      <th>Status</th>
+                      <th className="border-0 px-4 py-3">Judul Laporan</th>
+                      <th className="border-0 py-3">Tanggal</th>
+                      <th className="border-0 py-3">Status</th>
+                      <th className="border-0 py-3 text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {reports.map((report, index) => (
-                      <tr key={index}>
-                        <td>{report.title}</td>
-                        <td>{report.date}</td>
-                        <td>
-                          <span
-                            className={`badge bg-${getStatusColor(
-                              report.status
-                            )}`}
-                          >
-                            {report.status}
-                          </span>
+                    {sortedReports.length > 0 ? (
+                      sortedReports.map((report, index) => (
+                        <tr key={report?.id || index}>
+                          <td className="px-4 py-3">
+                            <div className="fw-medium">
+                              {report?.judul || report?.title || "Tanpa Judul"}
+                            </div>
+                            {report?.deskripsi && (
+                              <small className="text-muted">
+                                {report.deskripsi.length > 50 
+                                  ? report.deskripsi.substring(0, 50) + "..." 
+                                  : report.deskripsi}
+                              </small>
+                            )}
+                          </td>
+                          <td className="py-3">
+                            <small className="text-muted">
+                              {formatDate(report?.created_at || report?.tanggal || report?.date)}
+                            </small>
+                          </td>
+                          <td className="py-3">
+                            <span
+                              className={`badge bg-${getStatusColor(
+                                report?.status
+                              )}`}
+                            >
+                              {report?.status || "Tidak Diketahui"}
+                            </span>
+                          </td>
+                          <td className="py-3 text-center">
+                          <button 
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => handleViewDetail(report)}
+                            >
+                              <i className="bi bi-eye"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="text-center text-muted py-5">
+                          <i className="bi bi-inbox mb-3 d-block" style={{fontSize: '3rem'}}></i>
+                          <div>Belum ada laporan</div>
+                          <small className="text-muted">Laporan yang masuk akan ditampilkan di sini</small>
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -234,20 +572,31 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
+      <ModalDetailRiwayat 
+        show={showModal} 
+        laporan={selectedReport} 
+        onHide={handleCloseModal} 
+      />
     </div>
   );
 };
 
+
+
 // Helper untuk warna status
 const getStatusColor = (status) => {
-  switch (status) {
-    case "Dalam Proses":
+  if (!status) return "secondary";
+
+  const normalized = status.toLowerCase();
+
+  switch (normalized) {
+    case "dalam proses":
       return "info";
-    case "Perlu Ditinjau":
+    case "perlu ditinjau":
       return "warning";
-    case "Selesai":
+    case "selesai":
       return "success";
-    case "Ditolak":
+    case "ditolak":
       return "danger";
     default:
       return "secondary";
