@@ -5,7 +5,7 @@ import Pengguna from "./pages/Admin/Pengguna";
 import AdminDashboard from "./pages/admin/index";
 import LandingPage from "./pages/public";
 import FormLapor from "./pages/public/laporan/create";
-import RiwayatUser from "./pages/public/riwayat-user/index";
+import RiwayatUser from "./pages/public/riwayatuser/index";
 // Import Auth Components
 import Login from "./pages/_auth/login";
 import Register from "./pages/_auth/register";
