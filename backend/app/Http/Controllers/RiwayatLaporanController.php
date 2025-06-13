@@ -10,9 +10,7 @@ class RiwayatLaporanController extends Controller
     // Ambil semua data riwayat laporan
     public function index()
     {
-        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat'])
-            ->orderBy('created_at')
-            ->get();
+        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->get();
 
         return response()->json([
             'success' => true,
@@ -23,7 +21,7 @@ class RiwayatLaporanController extends Controller
     // Ambil detail riwayat laporan
     public function show($id)
     {
-        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat'])->find($id);
+        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->find($id);
 
         if (!$riwayat) {
             return response()->json([
@@ -45,8 +43,6 @@ class RiwayatLaporanController extends Controller
             'jenis' => 'required|in:laporan,surat',
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'status' => 'nullable|in:perlu ditinjau,dalam proses,selesai,ditolak',
-            'komentar' => 'nullable|string',
             'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,csv|max:20480',
             'kontak' => 'nullable|string',
             'laporan_laporan_id' => 'nullable|exists:laporan,laporan_id',
@@ -64,15 +60,28 @@ class RiwayatLaporanController extends Controller
             $uploadedFile = $request->file('file');
             $filename = time() . '_' . $uploadedFile->getClientOriginalName();
             $path = $uploadedFile->storeAs('uploads/riwayat', $filename, 'public');
+
+            // Simpan path relatif ke database
             $data['file'] = $path;
         }
 
         $riwayat = RiwayatLaporan::create($data);
 
+        // Load relasi yang diperlukan
+        $riwayat->load(['laporan.kategori', 'surat', 'users', 'laporan']);
+
+        // Transform data untuk response - tambahkan URL lengkap untuk file
+        $responseData = $riwayat->toArray();
+        if ($riwayat->file) {
+            $responseData['file_url'] = asset('storage/' . $riwayat->file);
+            // Untuk compatibility dengan frontend, buat array media
+            $responseData['media'] = [asset('storage/' . $riwayat->file)];
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Riwayat laporan berhasil dibuat',
-            'data' => $riwayat
+            'data' => $responseData
         ], 201);
     }
 
