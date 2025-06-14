@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RiwayatAdmin from "./pages/Admin/riwayatadmin";
 import KelolaLaporan from "./pages/Admin/kelolalaporan";
 import Pengguna from "./pages/Admin/Pengguna";
-import AdminDashboard from "./pages/admin/index";
+import AdminDashboard from "./pages/Admin/index";
 import LandingPage from "./pages/public";
 import FormLapor from "./pages/public/laporan/create";
 import RiwayatUser from "./pages/public/riwayatuser/index";

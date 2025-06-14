@@ -1,5 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function Header() {
     const navigate = useNavigate();
@@ -23,9 +27,36 @@ export default function Header() {
         return initials.toUpperCase();
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const result = await MySwal.fire({
+            title: 'Konfirmasi Logout',
+            text: 'Apakah Anda yakin ingin logout?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, logout',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'btn btn-danger me-2',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false
+        });
+    
+        if (!result.isConfirmed) return;
+    
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+    
+        await MySwal.fire({
+            title: 'Sampai jumpa!',
+            text: 'Anda berhasil logout.',
+            icon: 'success',
+            customClass: {
+                confirmButton: 'btn btn-success'
+            },
+            buttonsStyling: false
+        });
+    
         navigate('/login');
     };
 

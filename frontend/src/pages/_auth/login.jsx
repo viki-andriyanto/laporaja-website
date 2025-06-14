@@ -3,6 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../../_services/auth';
 import backgroundImage from '../../assets/bg2.jpg';
 import logoImage from '../../assets/logo.png';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -73,19 +77,37 @@ export default function Login() {
   
       console.log('Login berhasil:', response);
   
+      // ✅ Tambahkan pop-up notifikasi login berhasil
+      await MySwal.fire({
+        title: 'Berhasil!',
+        text: 'Login berhasil. Selamat datang!',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+  
       // Cek role atau flag admin
       if (response.user.role === 'admin') {
         navigate('/dashboard'); // arahkan ke dashboard admin
       } else {
         navigate('/'); // default dashboard user biasa
       }
+  
     } catch (error) {
       const msg = error.response?.data?.message || 'Login gagal. Periksa NIK dan password Anda.';
       setError(msg);
+  
+      // ❌ Opsional: kalau mau, kasih juga alert gagal:
+      await MySwal.fire({
+        title: 'Login Gagal',
+        text: msg,
+        icon: 'error',
+        timer: 2000
+      });
     } finally {
       setIsLoading(false);
     }
-  };  
+  };
 
   return (
     <div
@@ -204,7 +226,7 @@ const inputStyle = {
 const buttonStyle = {
   width: '100%',
   padding: '10px',
-  backgroundColor: '#4285F4',
+  backgroundColor: '#5961f2',
   color: 'white',
   border: 'none',
   borderRadius: '5px',

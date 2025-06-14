@@ -4,6 +4,10 @@ import { updateUser } from '../_services/user'; // Changed to use user service
 import { useNavigate } from 'react-router-dom';
 import Header from './header';
 import { Modal, Button, Form } from 'react-bootstrap';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function Profil() {
     const [user, setUser] = useState(null);
@@ -93,20 +97,79 @@ export default function Profil() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        const result = await MySwal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin memperbarui profil?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, perbarui!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'btn btn-success me-2',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false
+        });
+    
+        if (!result.isConfirmed) return;
+    
         try {
             const response = await updateUser(user.id, editForm);
-            setUser(response.data); // Asumsi response.data berisi data user terupdate
+            setUser(response.data);
             localStorage.setItem('user', JSON.stringify(response.data));
             setShowEditModal(false);
+    
+            await MySwal.fire({
+                title: 'Berhasil!',
+                text: 'Profil berhasil diperbarui.',
+                icon: 'success',
+                customClass: {
+                confirmButton: 'btn btn-success'
+                },
+                buttonsStyling: false
+            });
         } catch (error) {
             console.error("Gagal memperbarui profil:", error);
             setError('Gagal memperbarui profil. Silakan coba lagi.');
+            MySwal.fire({
+                title: 'Gagal!',
+                text: 'Profil gagal diperbarui.',
+                icon: 'error'
+            });
         }
     };
-
-    const handleLogout = () => {
+    
+    const handleLogout = async () => {
+        const result = await MySwal.fire({
+            title: 'Konfirmasi Logout',
+            text: 'Apakah Anda yakin ingin logout?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, logout',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'btn btn-danger me-2',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false
+        });
+    
+        if (!result.isConfirmed) return;
+    
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+    
+        await MySwal.fire({
+            title: 'Sampai jumpa!',
+            text: 'Anda berhasil logout.',
+            icon: 'success',
+            customClass: {
+                confirmButton: 'btn btn-success'
+            },
+            buttonsStyling: false
+        });
+    
         navigate('/login');
     };
 

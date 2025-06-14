@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RiwayatLaporan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RiwayatLaporanController extends Controller
 {
@@ -11,6 +12,11 @@ class RiwayatLaporanController extends Controller
     public function index()
     {
         $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->get();
+
+        // Transform data untuk menambahkan URL file yang benar
+        $riwayat = $riwayat->map(function ($item) {
+            return $this->transformRiwayatData($item);
+        });
 
         return response()->json([
             'success' => true,
@@ -29,6 +35,9 @@ class RiwayatLaporanController extends Controller
                 'message' => 'Riwayat laporan tidak ditemukan'
             ], 404);
         }
+
+        // Transform data untuk menambahkan URL file yang benar
+        $riwayat = $this->transformRiwayatData($riwayat);
 
         return response()->json([
             'success' => true,
@@ -59,6 +68,8 @@ class RiwayatLaporanController extends Controller
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
             $filename = time() . '_' . $uploadedFile->getClientOriginalName();
+
+            // Simpan file ke storage/app/public/uploads/riwayat
             $path = $uploadedFile->storeAs('uploads/riwayat', $filename, 'public');
 
             // Simpan path relatif ke database
@@ -68,15 +79,10 @@ class RiwayatLaporanController extends Controller
         $riwayat = RiwayatLaporan::create($data);
 
         // Load relasi yang diperlukan
-        $riwayat->load(['laporan.kategori', 'surat', 'users', 'laporan']);
+        $riwayat->load(['laporan.kategori', 'surat', 'user', 'laporan']);
 
-        // Transform data untuk response - tambahkan URL lengkap untuk file
-        $responseData = $riwayat->toArray();
-        if ($riwayat->file) {
-            $responseData['file_url'] = asset('storage/' . $riwayat->file);
-            // Untuk compatibility dengan frontend, buat array media
-            $responseData['media'] = [asset('storage/' . $riwayat->file)];
-        }
+        // Transform data untuk response
+        $responseData = $this->transformRiwayatData($riwayat);
 
         return response()->json([
             'success' => true,
@@ -89,8 +95,10 @@ class RiwayatLaporanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'status' => 'sometimes|in:perlu ditinjau,dalam proses,selesai,ditolak',
-            'komentar' => 'sometimes|nullable|string'
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,csv|max:20480',
+            'kontak' => 'nullable|string',
         ]);
 
         $riwayat = RiwayatLaporan::find($id);
@@ -104,10 +112,13 @@ class RiwayatLaporanController extends Controller
 
         $riwayat->update($request->only(['status', 'komentar']));
 
+        // Transform data untuk response
+        $responseData = $this->transformRiwayatData($riwayat);
+
         return response()->json([
             'success' => true,
             'message' => 'Riwayat laporan berhasil diperbarui',
-            'data' => $riwayat
+            'data' => $responseData
         ]);
     }
 
@@ -133,10 +144,13 @@ class RiwayatLaporanController extends Controller
             'komentar' => $request->komentar
         ]);
 
+        // Transform data untuk response
+        $responseData = $this->transformRiwayatData($riwayat);
+
         return response()->json([
             'success' => true,
             'message' => 'Status riwayat laporan berhasil diperbarui',
-            'data' => $riwayat
+            'data' => $responseData
         ]);
     }
 
@@ -152,11 +166,45 @@ class RiwayatLaporanController extends Controller
             ], 404);
         }
 
+        // Hapus file jika ada
+        if ($riwayat->file && Storage::disk('public')->exists($riwayat->file)) {
+            Storage::disk('public')->delete($riwayat->file);
+        }
+
         $riwayat->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Riwayat laporan berhasil dihapus'
         ]);
+    }
+
+    /**
+     * Transform data riwayat untuk menambahkan URL file yang benar
+     */
+    private function transformRiwayatData($riwayat)
+    {
+        $data = $riwayat->toArray();
+
+        // Tambahkan URL file yang benar
+        if ($riwayat->file) {
+            // Pastikan file ada di storage
+            if (Storage::disk('public')->exists($riwayat->file)) {
+                $fileUrl = asset('storage/' . $riwayat->file);
+                $data['file_url'] = $fileUrl;
+
+                // Untuk compatibility dengan frontend, buat array media
+                $data['media'] = [$fileUrl];
+            } else {
+                // File tidak ada di storage
+                $data['file_url'] = null;
+                $data['media'] = [];
+            }
+        } else {
+            $data['file_url'] = null;
+            $data['media'] = [];
+        }
+
+        return $data;
     }
 }
