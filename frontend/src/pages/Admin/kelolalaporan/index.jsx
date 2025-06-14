@@ -16,6 +16,7 @@ import {
   updateRiwayat,
   deleteRiwayat,
 } from "../../../_services/riwayat-laporan";
+import ModalDetailRiwayat from "../../../shared/ModalDetailRiwayat";
 
 /* -------------------------------------------------------------------------- */
 /*  Helper util & constant                                                     */
@@ -40,117 +41,7 @@ const formatTanggal = (t) => {
   return isValid(d) ? format(d, "dd/MM/yyyy HH:mm") : "-";
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Modal detail                                                               */
-/* -------------------------------------------------------------------------- */
 
-const ModalDetailRiwayat = ({ show, item, onHide, onUpdate }) => {
-  const [comment, setComment] = useState("");
-
-  useEffect(() => {
-    if (item) {
-      setComment(item.komentar ?? "");
-    }
-  }, [item]);
-
-  if (!item) return null;
-
-  const changeStatus = (status) => onUpdate(item.riwayat_id, status, comment);
-
-  return (
-    <Modal show={show} onHide={onHide} centered size="lg">
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title>Detail Riwayat • ID #{item.riwayat_id}</Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-        {/* Info ringkas */}
-        <p className="mb-1">
-          <strong>Tanggal:</strong> {formatTanggal(item.created_at)}
-        </p>
-        <p className="mb-1">
-          <strong>Jenis:</strong> {item.jenis}
-        </p>
-        <p className="mb-3">
-          <strong>Status:</strong> {getStatusBadge(item.status)}
-        </p>
-
-        {/* Judul & Deskripsi */}
-        <h4 className="fw-bold">{item.judul}</h4>
-        <Form.Group className="mb-4">
-          <Form.Control
-            as="textarea"
-            rows={4}
-            readOnly
-            value={item.deskripsi || "-"}
-          />
-        </Form.Group>
-
-        {/* Gambar (opsional) */}
-        {item.file && (
-          <div className="text-center mb-4">
-            <Image
-              src={`http://localhost:8000/storage/${item.file}`}
-              fluid
-              rounded
-              style={{ maxHeight: 300 }}
-            />
-          </div>
-        )}
-
-        {/* Komentar admin */}
-        <Form.Group className="mb-3">
-          <Form.Label className="fw-bold">Komentar Admin</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Tulis komentar…"
-          />
-        </Form.Group>
-
-        {/* Tombol ubah status */}
-        <h6 className="fw-bold">Ubah Status</h6>
-        <ButtonGroup className="flex-wrap gap-2">
-          {STATUS_OPTIONS.map(({ key, label, variant }) => (
-            <Button
-              key={key}
-              size="sm"
-              variant={item.status === key ? variant : `outline-${variant}`}
-              onClick={() => changeStatus(key)}
-            >
-              {label}
-            </Button>
-          ))}
-        </ButtonGroup>
-      </Modal.Body>
-
-      <Modal.Footer>
-        {/* aksi cepat ✔️ / ❌ */}
-        <Button
-          variant="success"
-          onClick={() => changeStatus("selesai")}
-          title="Tandai selesai"
-        >
-          <Check2 />
-        </Button>
-        <Button
-          variant="danger"
-          onClick={() => changeStatus("ditolak")}
-          title="Tandai ditolak"
-          className="me-auto"
-        >
-          <X />
-        </Button>
-
-        <Button variant="secondary" onClick={onHide}>
-          Tutup
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-};
 
 /* -------------------------------------------------------------------------- */
 /*  Halaman utama                                                              */
@@ -212,15 +103,11 @@ const KelolaLaporan = () => {
     })();
   }, []);
 
+
   /* -------------------------- handler util ------------------------------ */
   const openModal = (item) => {
     setSelectedItem(item);
     setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedItem(null);
   };
 
   const handleStatusChange = async (id, status, komentar) => {
@@ -273,13 +160,24 @@ const KelolaLaporan = () => {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
   /* -------------------------- render ----------------------------------- */
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border" role="status" />
-      </div>
-    );
-  }
+    // Loading state
+    if (loading) {
+      return (
+        <div className="container-fluid">
+          <div className="row">
+            <Sidebar />
+            <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+              <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+                <div className="text-center">
+                  <div className="spinner-border text-primary" role="status"></div>
+                  <p className="mt-3 text-muted">Memuat Data Laporan & Surat...</p>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      );
+    }
 
   if (error) {
     return (
@@ -490,8 +388,9 @@ const KelolaLaporan = () => {
       <ModalDetailRiwayat
         show={showModal}
         item={selectedItem}
-        onHide={closeModal}
+        onHide={() => setShowModal(false)}
         onUpdate={handleStatusChange}
+        isAdmin={true}
       />
       
     </div>

@@ -151,7 +151,7 @@ const Pengguna = () => {
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
               <div className="text-center">
                 <div className="spinner-border text-primary" role="status"></div>
-                <p className="mt-3 text-muted">Memuat data pengguna...</p>
+                <p className="mt-3 text-muted">Memuat Data Pengguna...</p>
               </div>
             </div>
           </main>
