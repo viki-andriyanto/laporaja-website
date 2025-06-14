@@ -49,6 +49,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/surat', [SuratController::class, 'store']);
     Route::post('/riwayat-laporan', [RiwayatLaporanController::class, 'store']);
 
+    // Routes delete untuk hooks dari laporan/surat
+    Route::delete('/surat/{surat}', [SuratController::class, 'destroy']);
+    Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy']);
+
     // Routes dengan middleware tambahan untuk admin
     Route::middleware('role:admin')->group(function () {
         // Kategori management (admin only)
@@ -58,11 +62,10 @@ Route::middleware(['auth:api'])->group(function () {
 
         // Laporan management (admin only)
         Route::post('/laporan/{laporan}', [LaporanController::class, 'update']);
-        Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy']);
 
         // Surat management (admin only)
         Route::post('/surat/{surat}', [SuratController::class, 'update']);
-        Route::delete('/surat/{surat}', [SuratController::class, 'destroy']);
+
 
         // Riwayat Laporan management (admin only)
         Route::post('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'update']);
