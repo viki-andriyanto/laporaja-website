@@ -30,12 +30,12 @@ export const useFormSubmission = () => {
             riwayatFormData.append("jenis", "laporan");
             riwayatFormData.append("judul", formData.judul);
             riwayatFormData.append("deskripsi", formData.deskripsi);
-            riwayatFormData.append("status", "dalam proses");
+            riwayatFormData.append("status", "perlu ditinjau");
             riwayatFormData.append("laporan_laporan_id", laporanId);
 
             if (formData.file) riwayatFormData.append("file", formData.file);
             if (formData.kontak) riwayatFormData.append("kontak", formData.kontak);
-            // riwayatFormData.append("users_user_id", userId); // Tambahkan jika ada
+            
 
             const riwayatResponse = await createRiwayat(riwayatFormData);
 
@@ -82,12 +82,12 @@ export const useFormSubmission = () => {
             riwayatFormData.append("jenis", "surat");
             riwayatFormData.append("judul", formData.judul);
             riwayatFormData.append("deskripsi", formData.deskripsi);
-            riwayatFormData.append("status", "dalam proses");
+            riwayatFormData.append("status", "perlu ditinjau");
             riwayatFormData.append("surat_surat_id", suratId);
 
             if (formData.file) riwayatFormData.append("file", formData.file);
             if (formData.kontak) riwayatFormData.append("kontak", formData.kontak);
-            // riwayatFormData.append("users_user_id", userId); // Tambahkan jika ada
+            
 
             const riwayatResponse = await createRiwayat(riwayatFormData);
 
