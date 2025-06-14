@@ -89,18 +89,25 @@ const AdminDashboard = () => {
   const totalUsers = Array.isArray(reports)
   ? new Set(reports.map(r => r?.users_user_id).filter(Boolean)).size
   : 0;
-  const laporanSelesai = Array.isArray(reports) 
-    ? reports.filter(report => report?.status === "Selesai").length 
-    : 0;
-  const persentaseSelesai = totalLaporan > 0 ? ((laporanSelesai / totalLaporan) * 100).toFixed(0) : 0;
 
   // Data untuk grafik - hitung berdasarkan status dengan safe handling
-  const statusCounts = Array.isArray(reports) ? reports.reduce((acc, report) => {
-    if (report && report.status) {
-      acc[report.status] = (acc[report.status] || 0) + 1;
-    }
-    return acc;
-  }, {}) : {};
+  // Hitung statusCounts dulu
+  const statusCounts = Array.isArray(reports)
+    ? reports.reduce((acc, report) => {
+        if (report && report.status) {
+          acc[report.status] = (acc[report.status] || 0) + 1;
+        }
+        return acc;
+      }, {})
+    : {};
+
+  // Hitung persentase per status
+  const statusPersentase = {};
+  if (totalLaporan > 0) {
+    Object.entries(statusCounts).forEach(([status, count]) => {
+      statusPersentase[status] = ((count / totalLaporan) * 100).toFixed(0);
+    });
+  }
 
   const chartData = {
     labels: Object.keys(statusCounts),
@@ -653,14 +660,23 @@ const AdminDashboard = () => {
                     <i className="bi bi-graph-up me-2 text-success"></i>
                     Progress Laporan
                   </h5>
-                  <div className="progress mb-3" style={{ height: "25px" }}>
-                    <div
-                      className="progress-bar bg-success progress-bar-striped"
-                      role="progressbar"
-                      style={{ width: `${persentaseSelesai}%` }}
-                    >
-                      {persentaseSelesai}%
-                    </div>
+                  <div className="progress mb-3" style={{ height: "25px", position: "relative" }}>
+                    {Object.entries(statusPersentase).map(([status, percent]) => (
+                      <div
+                        key={status}
+                        className={`progress-bar bg-${getStatusColor(status)}`}
+                        role="progressbar"
+                        style={{
+                          width: `${percent}%`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.75rem"
+                        }}
+                      >
+                        {percent > 5 ? `${percent}%` : null} {/* Sembunyikan teks kalau terlalu kecil */}
+                      </div>
+                    ))}
                   </div>
                   <div className="list-group list-group-flush">
                     {Object.keys(statusCounts).length > 0 ? (
