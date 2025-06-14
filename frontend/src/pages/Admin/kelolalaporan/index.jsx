@@ -13,10 +13,14 @@ import Sidebar from "../../../shared/sidebar";
 import { isValid, parseISO, format } from "date-fns";
 import {
   getAllRiwayat,
-  updateRiwayat,
   deleteRiwayat,
+  updateStatusRiwayat,
 } from "../../../_services/riwayat-laporan";
 import ModalDetailRiwayat from "../../../shared/ModalDetailRiwayat";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 /* -------------------------------------------------------------------------- */
 /*  Helper util & constant                                                     */
@@ -40,8 +44,6 @@ const formatTanggal = (t) => {
   const d = parseISO(safe);
   return isValid(d) ? format(d, "dd/MM/yyyy HH:mm") : "-";
 };
-
-
 
 /* -------------------------------------------------------------------------- */
 /*  Halaman utama                                                              */
@@ -103,7 +105,6 @@ const KelolaLaporan = () => {
     })();
   }, []);
 
-
   /* -------------------------- handler util ------------------------------ */
   const openModal = (item) => {
     setSelectedItem(item);
@@ -112,35 +113,101 @@ const KelolaLaporan = () => {
 
   const handleStatusChange = async (id, status, komentar) => {
     try {
-      await updateRiwayat(id, { status, komentar });
+      // Gunakan fungsi updateStatusRiwayat khusus untuk update status
+      await updateStatusRiwayat(id, { status, komentar });
+
+      // Update data di state
       setRiwayatData((prev) =>
-        prev.map((it) =>
-          it.riwayat_id === id ? { ...it, status, komentar } : it
+        prev.map((item) =>
+          item.riwayat_id === id ? { ...item, status, komentar } : item
         )
       );
+
+      // Update item yang sedang dipilih di modal
       if (selectedItem?.riwayat_id === id) {
-        setSelectedItem((s) => ({ ...s, status, komentar }));
+        setSelectedItem((prev) => ({ ...prev, status, komentar }));
       }
+
+      // Tampilkan notifikasi sukses
+      MySwal.fire({
+        title: "Berhasil!",
+        text: "Status berhasil diperbarui",
+        icon: "success",
+        customClass: {
+          confirmButton: "btn btn-success",
+        },
+        buttonsStyling: false,
+      });
     } catch (err) {
-      console.error(err);
-      alert("Gagal memperbarui status.");
+      console.error("Error updating status:", err);
+
+      // Tampilkan notifikasi error dengan pesan lebih spesifik
+      MySwal.fire({
+        title: "Gagal!",
+        text: err.response?.data?.message || "Gagal memperbarui status",
+        icon: "error",
+        customClass: {
+          confirmButton: "btn btn-danger",
+        },
+        buttonsStyling: false,
+      });
     }
   };
 
   const confirmDelete = (id) => {
     setIdToDelete(id);
-    setShowDeleteModal(true);
+
+    MySwal.fire({
+      title: "Konfirmasi Hapus",
+      text: "Yakin nih mau dihapus datanya?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Hapus Sekarang",
+      cancelButtonText: "Batal",
+      customClass: {
+        confirmButton: "btn btn-danger me-2",
+        cancelButton: "btn btn-secondary",
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleDeleteConfirmed();
+      }
+    });
   };
 
   const handleDeleteConfirmed = async () => {
     try {
       await deleteRiwayat(idToDelete);
+
+      // Show success notification
+      await MySwal.fire({
+        title: "Berhasil!",
+        text: "Data berhasil dihapus.",
+        icon: "success",
+        customClass: {
+          confirmButton: "btn btn-success",
+        },
+        buttonsStyling: false,
+      });
+
+      // Update state to remove the deleted item
       setRiwayatData((prev) =>
         prev.filter((it) => it.riwayat_id !== idToDelete)
       );
     } catch (err) {
       console.error(err);
-      alert("Gagal menghapus data.");
+
+      // Show error notification
+      await MySwal.fire({
+        title: "Gagal!",
+        text: "Gagal menghapus data.",
+        icon: "error",
+        customClass: {
+          confirmButton: "btn btn-danger",
+        },
+        buttonsStyling: false,
+      });
     } finally {
       setShowDeleteModal(false);
       setIdToDelete(null);
@@ -149,7 +216,18 @@ const KelolaLaporan = () => {
 
   /* -------------------------- filter & paging --------------------------- */
   const filtered = riwayatData.filter((it) =>
-    [it.judul, it.status, it.jenis, it.created_at]
+    [
+      it.judul,
+      it.status,
+      it.jenis,
+      it.created_at,
+      // Tambahkan field untuk kategori jika ada
+      it.jenis === "laporan" && it.laporan?.kategori?.nama_kategori,
+      // Tambahkan field untuk jenis surat jika ada
+      it.jenis === "surat" && it.surat?.jenis_surat,
+      // Tambahkan field lain jika diperlukan
+      it.deskripsi,
+    ]
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
@@ -160,24 +238,32 @@ const KelolaLaporan = () => {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
   /* -------------------------- render ----------------------------------- */
-    // Loading state
-    if (loading) {
-      return (
-        <div className="container-fluid">
-          <div className="row">
-            <Sidebar />
-            <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-              <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-                <div className="text-center">
-                  <div className="spinner-border text-primary" role="status"></div>
-                  <p className="mt-3 text-muted">Memuat Data Laporan & Surat...</p>
-                </div>
+  // Loading state
+  if (loading) {
+    return (
+      <div className="container-fluid">
+        <div className="row">
+          <Sidebar />
+          <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+              className="d-flex justify-content-center align-items-center"
+              style={{ minHeight: "60vh" }}
+            >
+              <div className="text-center">
+                <div
+                  className="spinner-border text-primary"
+                  role="status"
+                ></div>
+                <p className="mt-3 text-muted">
+                  Memuat Data Laporan & Surat...
+                </p>
               </div>
-            </main>
-          </div>
+            </div>
+          </main>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -270,13 +356,14 @@ const KelolaLaporan = () => {
                             size="sm"
                             value={it.komentar || ""}
                             placeholder="Komentar…"
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              // Hanya update komentar tanpa mengubah status
                               handleStatusChange(
                                 it.riwayat_id,
-                                it.status,
+                                it.status, // Pertahankan status yang ada
                                 e.target.value
-                              )
-                            }
+                              );
+                            }}
                           />
                         </td>
 
@@ -380,7 +467,6 @@ const KelolaLaporan = () => {
             onHide={() => setShowDeleteModal(false)}
             onConfirm={handleDeleteConfirmed}
           />
-
         </main>
       </div>
 
@@ -392,7 +478,6 @@ const KelolaLaporan = () => {
         onUpdate={handleStatusChange}
         isAdmin={true}
       />
-      
     </div>
   );
 };

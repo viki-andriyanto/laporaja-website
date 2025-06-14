@@ -24,20 +24,20 @@ export const createRiwayat = async (data) => {
   try {
     const response = await API.post("/riwayat-laporan", data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return {
       success: true,
       data: response.data.data,
-      message: response.data.message || "Data berhasil disimpan"
+      message: response.data.message || "Data berhasil disimpan",
     };
   } catch (error) {
     console.error("Gagal membuat riwayat laporan:", error);
     return {
       success: false,
       error: error.response?.data?.message || error.message,
-      status: error.response?.status
+      status: error.response?.status,
     };
   }
 };
@@ -54,7 +54,20 @@ export const updateRiwayat = async (id, data) => {
 };
 
 export const updateStatusRiwayat = async (id, data) => {
-  return (await API.put(`/riwayat-laporan/${id}/status`, data)).data;
+  try {
+    const response = await API.put(`/riwayat-laporan/{id}/status`, data);
+    return response.data.data;
+  } catch (error) {
+    console.error("Gagal memperbarui status riwayat:", error);
+
+    // Lempar error dengan informasi lebih detail
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Gagal memperbarui status";
+
+    throw new Error(errorMessage);
+  }
 };
 
 export const deleteRiwayat = async (id) => {

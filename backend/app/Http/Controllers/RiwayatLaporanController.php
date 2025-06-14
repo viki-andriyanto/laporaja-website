@@ -125,33 +125,31 @@ class RiwayatLaporanController extends Controller
     // Update status riwayat laporan
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
-            'komentar' => 'nullable|string'
-        ]);
+        try {
+            $request->validate([
+                'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
+                'komentar' => 'nullable|string'
+            ]);
 
-        $riwayat = RiwayatLaporan::find($id);
+            $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])
+                ->findOrFail($id);
 
-        if (!$riwayat) {
+            $riwayat->update([
+                'status' => $request->status,
+                'komentar' => $request->komentar
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status berhasil diperbarui',
+                'data' => $this->transformRiwayatData($riwayat)
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Riwayat laporan tidak ditemukan'
-            ], 404);
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
-
-        $riwayat->update([
-            'status' => $request->status,
-            'komentar' => $request->komentar
-        ]);
-
-        // Transform data untuk response
-        $responseData = $this->transformRiwayatData($riwayat);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status riwayat laporan berhasil diperbarui',
-            'data' => $responseData
-        ]);
     }
 
     // Hapus riwayat laporan
@@ -184,25 +182,61 @@ class RiwayatLaporanController extends Controller
      */
     private function transformRiwayatData($riwayat)
     {
-        $data = $riwayat->toArray();
+        // Ambil hanya field yang diperlukan
+        $data = [
+            'riwayat_id' => $riwayat->riwayat_id,
+            'jenis' => $riwayat->jenis,
+            'judul' => $riwayat->judul,
+            'deskripsi' => $riwayat->deskripsi,
+            'kontak' => $riwayat->kontak,
+            'status' => $riwayat->status,
+            'komentar' => $riwayat->komentar,
+            'created_at' => $riwayat->created_at,
+            'updated_at' => $riwayat->updated_at,
+            'users_user_id' => $riwayat->users_user_id,
+            'laporan_laporan_id' => $riwayat->laporan_laporan_id,
+            'surat_surat_id' => $riwayat->surat_surat_id,
+        ];
 
         // Tambahkan URL file yang benar
         if ($riwayat->file) {
-            // Pastikan file ada di storage
-            if (Storage::disk('public')->exists($riwayat->file)) {
-                $fileUrl = asset('storage/' . $riwayat->file);
-                $data['file_url'] = $fileUrl;
-
-                // Untuk compatibility dengan frontend, buat array media
-                $data['media'] = [$fileUrl];
-            } else {
-                // File tidak ada di storage
-                $data['file_url'] = null;
-                $data['media'] = [];
-            }
+            $fileUrl = asset('storage/' . $riwayat->file);
+            $data['file_url'] = $fileUrl;
+            $data['media'] = [$fileUrl];
         } else {
             $data['file_url'] = null;
             $data['media'] = [];
+        }
+
+        // Tambahkan data relasi (hanya yang diperlukan)
+        if ($riwayat->jenis === 'laporan' && $riwayat->laporan) {
+            $data['laporan'] = [
+                'laporan_id' => $riwayat->laporan->laporan_id,
+                'kategori_id' => $riwayat->laporan->kategori_id,
+                'status_privasi' => $riwayat->laporan->status_privasi,
+            ];
+
+            if ($riwayat->laporan->kategori) {
+                $data['laporan']['kategori'] = [
+                    'kategori_id' => $riwayat->laporan->kategori->kategori_id,
+                    'nama_kategori' => $riwayat->laporan->kategori->nama_kategori,
+                ];
+            }
+        }
+
+        if ($riwayat->jenis === 'surat' && $riwayat->surat) {
+            $data['surat'] = [
+                'surat_id' => $riwayat->surat->surat_id,
+                'jenis_surat' => $riwayat->surat->jenis_surat,
+            ];
+        }
+
+        if ($riwayat->user) {
+            $data['user'] = [
+                'user_id' => $riwayat->user->user_id,
+                'nama' => $riwayat->user->nama,
+                'email' => $riwayat->user->email,
+            ];
         }
 
         return $data;
