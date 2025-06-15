@@ -53,38 +53,21 @@ export const updateRiwayat = async (id, data) => {
   }
 };
 
-// Update riwayat dimana digunakan untuk update status
+// Update this function to match backend expectations
 export const updateStatusRiwayat = async (id, data) => {
   try {
-    const response = await API.put(`/riwayat-laporan/${id}/status`, data);
+    // Send as a single object with status and komentar properties
+    const response = await API.post(`/riwayat-laporan/${id}/status`, {
+      status: data.status,
+      komentar: data.komentar
+    });
     return response.data.data;
   } catch (error) {
     console.error("Gagal memperbarui status riwayat:", error);
-
-    // Mengambil pesan kesalahan dari response
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
       "Gagal memperbarui status";
-
-    throw new Error(errorMessage);
-  }
-};
-
-// Update riwayat dimana digunakan untuk update komentar
-export const updateStatusKomentar = async (id, data) => {
-  try {
-    const response = await API.put(`/riwayat-laporan/${id}/komentar`, data);
-    return response.data.data;
-  } catch (error) {
-    console.error("Gagal memperbarui komentar riwayat:", error);
-
-    // Mengambil pesan kesalahan dari response
-    const errorMessage =
-      error.response?.data?.message ||
-      error.message ||
-      "Gagal memperbarui komentar";
-
     throw new Error(errorMessage);
   }
 };

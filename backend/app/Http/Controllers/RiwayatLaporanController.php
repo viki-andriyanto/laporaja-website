@@ -11,7 +11,15 @@ class RiwayatLaporanController extends Controller
     // Ambil semua data riwayat laporan
     public function index()
     {
-        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->get();
+        // Jika user adalah admin, tampilkan semua data
+        if (auth('api')->user()->role === 'admin') {
+            $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->get();
+        } else {
+            // Jika bukan admin, hanya tampilkan data milik user yang login
+            $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])
+                ->where('users_user_id', auth('api')->id())
+                ->get();
+        }
 
         // Transform data untuk menambahkan URL file yang benar
         $riwayat = $riwayat->map(function ($item) {
@@ -27,12 +35,21 @@ class RiwayatLaporanController extends Controller
     // Ambil detail riwayat laporan
     public function show($id)
     {
-        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])->find($id);
+        // Jika admin, bisa akses semua data
+        if (auth('api')->user()->role === 'admin') {
+            $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])
+                ->find($id);
+        } else {
+            // Jika bukan admin, hanya bisa akses data miliknya sendiri
+            $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])
+                ->where('users_user_id', auth('api')->id())
+                ->find($id);
+        }
 
         if (!$riwayat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Riwayat laporan tidak ditemukan'
+                'message' => 'Riwayat laporan tidak ditemukan atau Anda tidak memiliki akses'
             ], 404);
         }
 
@@ -91,7 +108,7 @@ class RiwayatLaporanController extends Controller
         ], 201);
     }
 
-    // Update riwayat laporan
+    // Update riwayat laporan (untuk user biasa)
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -101,16 +118,21 @@ class RiwayatLaporanController extends Controller
             'kontak' => 'nullable|string',
         ]);
 
-        $riwayat = RiwayatLaporan::find($id);
+        // Hanya user pemilik data yang bisa update
+        $riwayat = RiwayatLaporan::where('users_user_id', auth('api')->id())
+            ->find($id);
 
         if (!$riwayat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Riwayat laporan tidak ditemukan'
+                'message' => 'Riwayat laporan tidak ditemukan atau Anda tidak memiliki akses'
             ], 404);
         }
 
-        $riwayat->update($request->only(['status', 'komentar']));
+        // Hapus status dan komentar dari request jika ada
+        $data = $request->except(['status', 'komentar']);
+
+        $riwayat->update($data);
 
         // Transform data untuk response
         $responseData = $this->transformRiwayatData($riwayat);
@@ -122,34 +144,42 @@ class RiwayatLaporanController extends Controller
         ]);
     }
 
-    // Update status riwayat laporan
+    // Update status riwayat laporan (khusus admin)
     public function updateStatus(Request $request, $id)
     {
-        try {
-            $request->validate([
-                'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
-                'komentar' => 'nullable|string'
-            ]);
-
-            $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])
-                ->findOrFail($id);
-
-            $riwayat->update([
-                'status' => $request->status,
-                'komentar' => $request->komentar
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Status berhasil diperbarui',
-                'data' => $this->transformRiwayatData($riwayat)
-            ]);
-        } catch (\Exception $e) {
+        // Cek apakah user adalah admin
+        if (auth('api')->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Hanya admin yang dapat mengupdate status'
+            ], 403);
         }
+
+        $request->validate([
+            'status' => 'required|in:perlu ditinjau,dalam proses,selesai,ditolak',
+            'komentar' => 'nullable|string'
+        ]);
+
+        $riwayat = RiwayatLaporan::with(['user', 'laporan', 'surat', 'laporan.kategori'])
+            ->find($id);
+
+        if (!$riwayat) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Riwayat laporan tidak ditemukan'
+            ], 404);
+        }
+
+        $riwayat->update([
+            'status' => $request->status,
+            'komentar' => $request->komentar
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status berhasil diperbarui',
+            'data' => $this->transformRiwayatData($riwayat)
+        ]);
     }
 
     // Hapus riwayat laporan
@@ -213,7 +243,7 @@ class RiwayatLaporanController extends Controller
             $data['laporan'] = [
                 'laporan_id' => $riwayat->laporan->laporan_id,
                 'lokasi_kejadian' => $riwayat->laporan->lokasi_kejadian,
-                'kategori_kategori_id' => $riwayat->laporan->kategori_id,
+                'tanggal_kejadian' => $riwayat->laporan->tanggal_kejadian,
             ];
 
             if ($riwayat->laporan->kategori) {
@@ -233,9 +263,13 @@ class RiwayatLaporanController extends Controller
 
         if ($riwayat->user) {
             $data['user'] = [
-                'user_id' => $riwayat->user->user_id,
-                'nama' => $riwayat->user->nama,
-                'email' => $riwayat->user->email,
+                'id' => $riwayat->user->id,
+                'nama_lengkap' => $riwayat->user->nama_lengkap,
+                'nik' => $riwayat->user->nik,
+                'tempat_tinggal' => $riwayat->user->tempat_tinggal,
+                'tanggal_lahir' => $riwayat->user->tanggal_lahir,
+                'jenis_kelamin' => $riwayat->user->jenis_kelamin,
+                'no_telepon' => $riwayat->user->no_telepon
             ];
         }
 

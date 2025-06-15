@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Modal, Form, Badge, Image, ButtonGroup, Button } from "react-bootstrap";
 import { Check2, X } from "react-bootstrap-icons";
 import { isValid, parseISO, format } from "date-fns";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
+
 
 // Helper functions
 const formatTanggal = (t) => {
@@ -83,10 +88,12 @@ const ModalDetailRiwayat = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [comment, setComment] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   useEffect(() => {
     if (item) {
       setComment(item.komentar ?? "");
+      setSelectedStatus(item.status);
     }
   }, [item]);
 
@@ -298,9 +305,48 @@ const ModalDetailRiwayat = ({
     return null;
   };
 
-  const changeStatus = (status) => {
+  const handleSubmit = async () => {
+    const confirmChange = await MySwal.fire({
+      title: 'Konfirmasi Perubahan?',
+      text: "Anda yakin ingin menyimpan perubahan ini?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: "Ya, Simpan",
+      cancelButtonText: "Batal",
+      customClass: {
+        confirmButton: "btn btn-primary me-2",
+        cancelButton: "btn btn-secondary",
+    }
+    });
+  
+    if (!confirmChange.isConfirmed) return;
+  
     if (onUpdate) {
-      onUpdate(item.riwayat_id, status, comment);
+      try {
+        await onUpdate(item.riwayat_id, selectedStatus, comment);
+        // Modal akan ditutup melalui callback onHide yang dipanggil dari parent
+        await MySwal.fire({
+          title: 'Berhasil!',
+          text: 'Data berhasil diperbarui.',
+          icon: 'success',
+          customClass: {
+          confirmButton: 'btn btn-success'
+          },
+          buttonsStyling: false
+      });
+
+      if (onHide) {
+        onHide();
+      }
+      
+      } catch (error) {
+        console.error("Gagal menyimpan perubahan:", error);
+        MySwal.fire(
+          'Gagal!',
+          'Terjadi kesalahan saat menyimpan perubahan.',
+          'error'
+        );
+      }
     }
   };
 
@@ -453,8 +499,8 @@ const ModalDetailRiwayat = ({
                   <Button
                     key={key}
                     size="sm"
-                    variant={item.status === key ? variant : `outline-${variant}`}
-                    onClick={() => changeStatus(key)}
+                    variant={selectedStatus === key ? variant : `outline-${variant}`}
+                    onClick={() => setSelectedStatus(key)}
                   >
                     {label}
                   </Button>
@@ -466,25 +512,13 @@ const ModalDetailRiwayat = ({
       </Modal.Body>
       <Modal.Footer>
         {isAdmin && onUpdate && (
-          <>
-            <Button
-              variant="success"
-              onClick={() => changeStatus("selesai")}
-              title="Tandai selesai"
-            >
-              <Check2 />
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => changeStatus("ditolak")}
-              title="Tandai ditolak"
-              className="me-auto"
-            >
-              <X />
-            </Button>
-          </>
+          <Button 
+            variant="primary" 
+            onClick={handleSubmit}
+          >
+            Kirim
+          </Button>
         )}
-
         <Button variant="secondary" onClick={onHide}>
           Tutup
         </Button>

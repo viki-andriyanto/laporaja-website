@@ -49,29 +49,8 @@ const formatTanggal = (t) => {
 /*  Halaman utama                                                              */
 /* -------------------------------------------------------------------------- */
 
-const ModalKonfirmasiHapus = ({ show, onHide, onConfirm }) => {
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton className="bg-danger text-white">
-        <Modal.Title>Konfirmasi Hapus</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="text-center">
-        <p className="fs-5 fw-semibold">Yakin nih mau dihapus datanya?</p>
-      </Modal.Body>
-      <Modal.Footer className="justify-content-center">
-        <Button variant="secondary" onClick={onHide}>
-          Batal
-        </Button>
-        <Button variant="danger" onClick={onConfirm}>
-          Hapus Sekarang
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-};
-
 const KelolaLaporan = () => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
   const [riwayatData, setRiwayatData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -80,6 +59,8 @@ const KelolaLaporan = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeCommentField, setActiveCommentField] = useState(null);
+  const [commentValue, setCommentValue] = useState({});
 
   const itemsPerPage = 5;
 
@@ -96,6 +77,12 @@ const KelolaLaporan = () => {
       try {
         const list = await getAllRiwayat();
         setRiwayatData(list);
+        // Initialize comment values
+        const initialComments = {};
+        list.forEach(item => {
+          initialComments[item.riwayat_id] = item.komentar || '';
+        });
+        setCommentValue(initialComments);
       } catch (err) {
         console.error(err);
         setError("Gagal memuat data.");
@@ -113,38 +100,41 @@ const KelolaLaporan = () => {
 
   const handleStatusChange = async (id, status, komentar) => {
     try {
-      // Gunakan fungsi updateStatusRiwayat khusus untuk update status
+      // Check if the new comment is different from the current one
+      const currentItem = riwayatData.find(item => item.riwayat_id === id);
+      if (currentItem && currentItem.komentar === komentar && currentItem.status === status) {
+        return; // No changes, don't update
+      }
+  
       await updateStatusRiwayat(id, { status, komentar });
-
-      // Update data di state
-      setRiwayatData((prev) =>
-        prev.map((item) =>
+  
+      setRiwayatData(prev =>
+        prev.map(item =>
           item.riwayat_id === id ? { ...item, status, komentar } : item
         )
       );
-
-      // Update item yang sedang dipilih di modal
+  
       if (selectedItem?.riwayat_id === id) {
-        setSelectedItem((prev) => ({ ...prev, status, komentar }));
+        setSelectedItem(prev => ({ ...prev, status, komentar }));
       }
-
-      // Tampilkan notifikasi sukses
+  
       MySwal.fire({
         title: "Berhasil!",
-        text: "Status berhasil diperbarui",
+        text: "Perubahan berhasil disimpan",
         icon: "success",
         customClass: {
           confirmButton: "btn btn-success",
         },
         buttonsStyling: false,
       });
-    } catch (err) {
-      console.error("Error updating status:", err);
 
-      // Tampilkan notifikasi error dengan pesan lebih spesifik
+      setActiveCommentField(null); // Close the comment field after submit
+
+    } catch (err) {
+      console.error("Error updating:", err);
       MySwal.fire({
         title: "Gagal!",
-        text: err.response?.data?.message || "Gagal memperbarui status",
+        text: err.message || "Gagal menyimpan perubahan",
         icon: "error",
         customClass: {
           confirmButton: "btn btn-danger",
@@ -152,6 +142,66 @@ const KelolaLaporan = () => {
         buttonsStyling: false,
       });
     }
+  };
+
+  const handleCommentChange = (id, value) => {
+    setCommentValue(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const confirmCommentChange = (id, status) => {
+    MySwal.fire({
+      title: "Konfirmasi Perubahan",
+      text: "Anda yakin ingin menyimpan perubahan komentar ini?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Simpan",
+      cancelButtonText: "Batal",
+      customClass: {
+        confirmButton: "btn btn-primary me-2",
+        cancelButton: "btn btn-secondary",
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleStatusChange(id, status, commentValue[id]);
+      }
+    });
+  };
+
+  const handleCommentReset = (id, originalComment) => {
+    setCommentValue(prev => ({
+      ...prev,
+      [id]: originalComment || ''
+    }));
+    setActiveCommentField(null);
+  };
+
+  
+
+  const confirmStatusChange = (id, status, currentComment) => {
+    const statusLabel = status === "selesai" ? "Selesai" : "Ditolak";
+    const confirmButtonColor = status === "selesai" ? "success" : "danger";
+    
+    MySwal.fire({
+      title: `Konfirmasi ${statusLabel}`,
+      text: `Anda yakin ingin mengubah status laporan ini menjadi ${statusLabel.toLowerCase()}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: `Ya, ${statusLabel}`,
+      cancelButtonText: "Batal",
+      customClass: {
+        confirmButton: `btn btn-${confirmButtonColor} me-2`,
+        cancelButton: "btn btn-secondary",
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleStatusChange(id, status, currentComment);
+      }
+    });
   };
 
   const confirmDelete = (id) => {
@@ -221,11 +271,8 @@ const KelolaLaporan = () => {
       it.status,
       it.jenis,
       it.created_at,
-      // Tambahkan field untuk kategori jika ada
       it.jenis === "laporan" && it.laporan?.kategori?.nama_kategori,
-      // Tambahkan field untuk jenis surat jika ada
       it.jenis === "surat" && it.surat?.jenis_surat,
-      // Tambahkan field lain jika diperlukan
       it.deskripsi,
     ]
       .join(" ")
@@ -352,19 +399,33 @@ const KelolaLaporan = () => {
                         <td>{getStatusBadge(it.status)}</td>
 
                         <td>
-                          <Form.Control
-                            size="sm"
-                            value={it.komentar || ""}
-                            placeholder="Komentar…"
-                            onChange={(e) => {
-                              // Hanya update komentar tanpa mengubah status
-                              handleStatusChange(
-                                it.riwayat_id,
-                                it.status, // Pertahankan status yang ada
-                                e.target.value
-                              );
-                            }}
-                          />
+                          <div className="d-flex flex-column">
+                            <Form.Control
+                              size="sm"
+                              value={commentValue[it.riwayat_id] || ""}
+                              placeholder="Komentar…"
+                              onChange={(e) => handleCommentChange(it.riwayat_id, e.target.value)}
+                              onFocus={() => setActiveCommentField(it.riwayat_id)}
+                            />
+                            {activeCommentField === it.riwayat_id && (
+                              <div className="d-flex justify-content-end gap-2 mt-2">
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => handleCommentReset(it.riwayat_id, it.komentar)}
+                                >
+                                  Reset
+                                </Button>
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  onClick={() => confirmCommentChange(it.riwayat_id, it.status)}
+                                >
+                                  Kirim
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </td>
 
                         <td className="text-center">
@@ -383,11 +444,11 @@ const KelolaLaporan = () => {
                             size="sm"
                             className="me-1"
                             title="Selesai"
-                            onClick={() =>
-                              handleStatusChange(
-                                it.riwayat_id,
-                                "selesai",
-                                it.komentar
+                            onClick={() => 
+                              confirmStatusChange(
+                                it.riwayat_id, 
+                                "selesai", 
+                                commentValue[it.riwayat_id] || it.komentar
                               )
                             }
                           >
@@ -399,11 +460,11 @@ const KelolaLaporan = () => {
                             size="sm"
                             className="me-1"
                             title="Tolak"
-                            onClick={() =>
-                              handleStatusChange(
-                                it.riwayat_id,
-                                "ditolak",
-                                it.komentar
+                            onClick={() => 
+                              confirmStatusChange(
+                                it.riwayat_id, 
+                                "ditolak", 
+                                commentValue[it.riwayat_id] || it.komentar
                               )
                             }
                           >
@@ -460,13 +521,6 @@ const KelolaLaporan = () => {
               )}
             </div>
           </div>
-
-          {/* Modal untuk konfirmasi hapus */}
-          <ModalKonfirmasiHapus
-            show={showDeleteModal}
-            onHide={() => setShowDeleteModal(false)}
-            onConfirm={handleDeleteConfirmed}
-          />
         </main>
       </div>
 

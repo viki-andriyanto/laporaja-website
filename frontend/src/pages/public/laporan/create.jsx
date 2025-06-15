@@ -116,7 +116,7 @@ function FormLaporan({ navigate }) {
 
                     <div className="col-12">
                         <label className="form-label">File/Video Pendukung <span className="text-muted">(Optional)</span></label>
-                        <input className="form-control" type="file" name="file" accept="image/*,video/*" />
+                        <input className="form-control" type="file" name="file" accept="image/*,video/*,audio/*" />
                     </div>
 
                     <div className="col-12">
@@ -210,7 +210,7 @@ function FormSurat({ navigate }) {
                     </div>
 
                     <div className="col-12">
-                        <label className="form-label">Lampiran <span className="text-muted">(Opsional)</span></label>
+                        <label className="form-label">Lampiran <span className="text-muted">(Optional)</span></label>
                         <input className="form-control" type="file" accept="image/*,.pdf" name="lampiran" />
                     </div>
 
