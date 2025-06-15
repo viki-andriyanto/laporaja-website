@@ -235,10 +235,7 @@ export default function Profil() {
                                 <div className="col-6">
                                     <button className="btn btn-primary w-100">Laporan Saya</button>
                                 </div>
-                                <div className="col-6">
-                                    <button className="btn btn-primary w-100">Notifikasi</button>
-                                </div>
-                                <div className="col-6">
+                                <div className="">
                                     <button className="btn btn-danger w-100" onClick={handleLogout}>Logout</button>
                                 </div>
                             </div>

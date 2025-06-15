@@ -42,7 +42,7 @@ export const createRiwayat = async (data) => {
   }
 };
 
-// Tambahkan fungsi update dan delete
+
 export const updateRiwayat = async (id, data) => {
   try {
     const response = await API.put(`/riwayat-laporan/${id}`, data);
@@ -53,18 +53,37 @@ export const updateRiwayat = async (id, data) => {
   }
 };
 
+// Update riwayat dimana digunakan untuk update status
 export const updateStatusRiwayat = async (id, data) => {
   try {
-    const response = await API.put(`/riwayat-laporan/{id}/status`, data);
+    const response = await API.put(`/riwayat-laporan/${id}/status`, data);
     return response.data.data;
   } catch (error) {
     console.error("Gagal memperbarui status riwayat:", error);
 
-    // Lempar error dengan informasi lebih detail
+    // Mengambil pesan kesalahan dari response
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
       "Gagal memperbarui status";
+
+    throw new Error(errorMessage);
+  }
+};
+
+// Update riwayat dimana digunakan untuk update komentar
+export const updateStatusKomentar = async (id, data) => {
+  try {
+    const response = await API.put(`/riwayat-laporan/${id}/komentar`, data);
+    return response.data.data;
+  } catch (error) {
+    console.error("Gagal memperbarui komentar riwayat:", error);
+
+    // Mengambil pesan kesalahan dari response
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Gagal memperbarui komentar";
 
     throw new Error(errorMessage);
   }

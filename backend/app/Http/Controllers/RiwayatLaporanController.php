@@ -212,8 +212,8 @@ class RiwayatLaporanController extends Controller
         if ($riwayat->jenis === 'laporan' && $riwayat->laporan) {
             $data['laporan'] = [
                 'laporan_id' => $riwayat->laporan->laporan_id,
-                'kategori_id' => $riwayat->laporan->kategori_id,
-                'status_privasi' => $riwayat->laporan->status_privasi,
+                'lokasi_kejadian' => $riwayat->laporan->lokasi_kejadian,
+                'kategori_kategori_id' => $riwayat->laporan->kategori_id,
             ];
 
             if ($riwayat->laporan->kategori) {

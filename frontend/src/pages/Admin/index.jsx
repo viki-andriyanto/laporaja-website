@@ -237,7 +237,7 @@ const AdminDashboard = () => {
                     <i className="bi bi-graph-up me-2 text-success"></i>
                     Progress Laporan
                   </h5>
-                  <div className="progress mb-3" style={{ height: "25px", position: "relative" }}>
+                  <div className="progress mt-4 mb-3" style={{ height: "25px", position: "relative" }}>
                     {Object.entries(statusPersentase).map(([status, percent]) => (
                       <div
                         key={status}
