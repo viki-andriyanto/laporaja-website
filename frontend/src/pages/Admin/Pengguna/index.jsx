@@ -1,17 +1,169 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from "../../../shared/sidebar";
 import { getAllUsers } from "../../../_services/user";
+import { Modal, Button, Card, Badge, Row, Col } from 'react-bootstrap';
+import { Eye, Person, Telephone, CardText, House, Calendar, GenderAmbiguous, Clock } from 'react-bootstrap-icons';
 
-// Helpers
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+// Komponen Detail Pengguna yang dipercantik
+const UserDetailCard = ({ user }) => {
+  if (!user) return null;
+
+  return (
+    <Card className="border-0 shadow-sm">
+      <Card.Body>
+        <div className="text-center mb-4">
+          <div className="d-inline-block position-relative">
+            <div className="bg-primary rounded-circle p-4">
+              <Person size={48} className="text-white" />
+            </div>
+          </div>
+          <h3 className="mt-3 mb-1">{user.nama_lengkap || '-'}</h3>
+          <p className="text-muted">Pengguna Terdaftar</p>
+        </div>
+
+        <div className="mb-4">
+          <Row className="g-3">
+            <Col md={6}>
+              <Card className="h-100 border">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <div className="bg-light rounded p-2 me-3">
+                      <CardText size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 text-muted">NIK</h6>
+                      <p className="mb-0 fs-5 fw-semibold">{user.nik || '-'}</p>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={6}>
+              <Card className="h-100 border">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <div className="bg-light rounded p-2 me-3">
+                      <Telephone size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 text-muted">No. Telepon</h6>
+                      <p className="mb-0 fs-5 fw-semibold">{user.no_telepon || '-'}</p>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={6}>
+              <Card className="h-100 border">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <div className="bg-light rounded p-2 me-3">
+                      <House size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 text-muted">Tempat Tinggal</h6>
+                      <p className="mb-0 fs-5 fw-semibold">{user.tempat_tinggal || '-'}</p>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={6}>
+              <Card className="h-100 border">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <div className="bg-light rounded p-2 me-3">
+                      <Calendar size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 text-muted">Tanggal Lahir</h6>
+                      <p className="mb-0 fs-5 fw-semibold">
+                        {user.tanggal_lahir ? new Date(user.tanggal_lahir).toLocaleDateString('id-ID', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        }) : '-'}
+                      </p>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={6}>
+              <Card className="h-100 border">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <div className="bg-light rounded p-2 me-3">
+                      <GenderAmbiguous size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 text-muted">Jenis Kelamin</h6>
+                      <Badge 
+                        bg={user.jenis_kelamin === 'Laki-laki' || user.jenis_kelamin === 'L' ? 'info' : 'warning'} 
+                        className="fs-6"
+                      >
+                        {user.jenis_kelamin || '-'}
+                      </Badge>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={6}>
+              <Card className="h-100 border">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <div className="bg-light rounded p-2 me-3">
+                      <Clock size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h6 className="mb-0 text-muted">Tanggal Dibuat</h6>
+                      <p className="mb-0 fs-5 fw-semibold">
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString('id-ID', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : '-'}
+                      </p>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </Card.Body>
+    </Card>
+  );
 };
 
+// Komponen Modal Detail Pengguna
+const UserDetailModal = ({ show, onHide, user }) => {
+  return (
+    <Modal show={show} onHide={onHide} size="lg" centered>
+      <Modal.Header closeButton className="border-bottom-0 pb-0">
+        <Modal.Title className="fw-bold">Detail Pengguna</Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="pt-0">
+        <UserDetailCard user={user} />
+      </Modal.Body>
+      <Modal.Footer className="border-top-0">
+        <Button variant="outline-secondary" onClick={onHide}>
+          Tutup
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
+
+// Komponen utama Pengguna
 const Pengguna = () => {
   // States
   const [users, setUsers] = useState([]);
@@ -20,6 +172,8 @@ const Pengguna = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const itemsPerPage = 8;
 
@@ -68,9 +222,8 @@ const Pengguna = () => {
   const getFilteredUsers = () => {
     const search = searchTerm.toLowerCase();
     return getSortedUsers().filter(user =>
-      ['nik', 'nama_lengkap', 'tempat_tinggal', 'tanggal_lahir', 'jenis_kelamin', 'no_telepon'].some(field =>
-        user[field]?.toString().toLowerCase().includes(search)
-      )
+      ['nik', 'nama_lengkap', 'no_telepon'].some(field =>
+        user[field]?.toString().toLowerCase().includes(search))
     );
   };
 
@@ -91,7 +244,7 @@ const Pengguna = () => {
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
-    const maxVisible = 5;
+    const maxVisible = 8;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
 
@@ -141,6 +294,12 @@ const Pengguna = () => {
     );
   };
 
+  // Fungsi untuk membuka modal detail
+  const handleShowDetailModal = (user) => {
+    setSelectedUser(user);
+    setShowDetailModal(true);
+  };
+
   // UI Loading State
   if (loading) {
     return (
@@ -164,13 +323,10 @@ const Pengguna = () => {
     <div className="container-fluid">
       <div className="row">
         <Sidebar />
-        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
 
           <div className="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom">
             <h1 className="h2"><i className="bi bi-people-fill me-2"></i>Daftar Pengguna</h1>
-            {/* <button className="btn btn-outline-primary" onClick={fetchUsers} disabled={loading}>
-              <i className="bi bi-arrow-clockwise me-1"></i>Refresh
-            </button> */}
           </div>
 
           {error && (
@@ -189,7 +345,7 @@ const Pengguna = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Cari NIK, nama, atau tempat tinggal..."
+                  placeholder="Cari NIK, nama, atau nomor telepon..."
                   value={searchTerm}
                   onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 />
@@ -215,19 +371,16 @@ const Pengguna = () => {
                 <table className="table table-hover mb-0">
                   <thead className="table-dark">
                     <tr>
-                      {[
-                        { key: 'nik', label: 'NIK', icon: 'card-text' },
-                        { key: 'nama_lengkap', label: 'Nama Lengkap', icon: 'person' },
-                        { key: 'tempat_tinggal', label: 'Tempat Tinggal', icon: 'house' },
-                        { key: 'tanggal_lahir', label: 'Tanggal Lahir', icon: 'calendar' },
-                        { key: 'jenis_kelamin', label: 'Jenis Kelamin', icon: 'gender-ambiguous' },
-                        { key: 'no_telepon', label: 'No. Telepon', icon: 'telephone' },
-                        { key: 'created_at', label: 'Tanggal Dibuat', icon: 'clock-history' }
-                      ].map(col => (
-                        <th key={col.key} onClick={() => requestSort(col.key)} style={{ cursor: 'pointer' }} className="text-nowrap">
-                          <i className={`bi bi-${col.icon} me-1`}></i>{col.label} {renderSortIcon(col.key)}
-                        </th>
-                      ))}
+                      <th onClick={() => requestSort('nik')} style={{ cursor: 'pointer' }} className="text-nowrap">
+                        <i className="bi bi-card-text me-1"></i>NIK {renderSortIcon('nik')}
+                      </th>
+                      <th onClick={() => requestSort('nama_lengkap')} style={{ cursor: 'pointer' }} className="text-nowrap">
+                        <i className="bi bi-person me-1"></i>Nama Lengkap {renderSortIcon('nama_lengkap')}
+                      </th>
+                      <th onClick={() => requestSort('no_telepon')} style={{ cursor: 'pointer' }} className="text-nowrap">
+                        <i className="bi bi-telephone me-1"></i>No. Telepon {renderSortIcon('no_telepon')}
+                      </th>
+                      <th className="text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -240,28 +393,21 @@ const Pengguna = () => {
                             <span className="fw-semibold">{user.nama_lengkap || '-'}</span>
                           </div>
                         </td>
-                        <td><span className="text-muted">{user.tempat_tinggal || '-'}</span></td>
-                        <td><span className="text-muted">{formatDate(user.tanggal_lahir)}</span></td>
-                        <td>
-                          <span className={`badge ${
-                            user.jenis_kelamin === 'Laki-laki' || user.jenis_kelamin === 'L'
-                              ? 'bg-info'
-                              : 'bg-warning'
-                          }`}>
-                            <i className={`bi ${
-                              user.jenis_kelamin === 'Laki-laki' || user.jenis_kelamin === 'L'
-                                ? 'bi-gender-male'
-                                : 'bi-gender-female'
-                            } me-1`}></i>
-                            {user.jenis_kelamin || '-'}
-                          </span>
-                        </td>
                         <td><span className="text-muted">{user.no_telepon || '-'}</span></td>
-                        <td><span className="text-muted">{formatDate(user.created_at)}</span></td>
+                        <td className="text-center">
+                          <Button
+                            variant="outline-info"
+                            size="sm"
+                            title="Detail Pengguna"
+                            onClick={() => handleShowDetailModal(user)}
+                          >
+                            <Eye /> Detail
+                          </Button>
+                        </td>
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan="7" className="text-center py-5 text-muted">
+                        <td colSpan="4" className="text-center py-5 text-muted">
                           <i className="bi bi-inbox display-4 d-block mb-3"></i>
                           <h5>Tidak ada data pengguna</h5>
                           <p>{searchTerm ? `Tidak ditemukan pengguna dengan kata kunci "${searchTerm}"` : 'Belum ada pengguna yang terdaftar'}</p>
@@ -287,6 +433,13 @@ const Pengguna = () => {
           )}
         </main>
       </div>
+
+      {/* Modal Detail Pengguna */}
+      <UserDetailModal
+        show={showDetailModal}
+        onHide={() => setShowDetailModal(false)}
+        user={selectedUser}
+      />
 
       {/* Custom styles */}
       <style jsx>{`

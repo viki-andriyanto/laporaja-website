@@ -5,7 +5,6 @@ import {
   Modal,
   Form,
   Badge,
-  Image,
   ButtonGroup,
 } from "react-bootstrap";
 import { Check2, X, Trash, Eye, ClipboardData } from "react-bootstrap-icons";
@@ -21,10 +20,6 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
-
-/* -------------------------------------------------------------------------- */
-/*  Helper util & constant                                                     */
-/* -------------------------------------------------------------------------- */
 
 const STATUS_OPTIONS = [
   { key: "perlu ditinjau", label: "Tinjau", variant: "warning" },
@@ -45,13 +40,7 @@ const formatTanggal = (t) => {
   return isValid(d) ? format(d, "dd/MM/yyyy HH:mm") : "-";
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Halaman utama                                                              */
-/* -------------------------------------------------------------------------- */
-
 const KelolaLaporan = () => {
-  const [setShowDeleteModal] = useState(false);
-  const [idToDelete, setIdToDelete] = useState(null);
   const [riwayatData, setRiwayatData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -62,9 +51,9 @@ const KelolaLaporan = () => {
   const [activeCommentField, setActiveCommentField] = useState(null);
   const [commentValue, setCommentValue] = useState({});
 
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
-  /* -------------------------- fetch data awal --------------------------- */
+  // Ambil data dengan filter status aktif (bukan selesai/ditolak)
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -76,10 +65,14 @@ const KelolaLaporan = () => {
     (async () => {
       try {
         const list = await getAllRiwayat();
-        setRiwayatData(list);
-        // Initialize comment values
+        // Filter hanya data dengan status aktif
+        const activeData = list.filter(item => 
+          item.status !== "selesai" && item.status !== "ditolak"
+        );
+        setRiwayatData(activeData);
+        
         const initialComments = {};
-        list.forEach(item => {
+        activeData.forEach(item => {
           initialComments[item.riwayat_id] = item.komentar || '';
         });
         setCommentValue(initialComments);
@@ -92,7 +85,6 @@ const KelolaLaporan = () => {
     })();
   }, []);
 
-  /* -------------------------- handler util ------------------------------ */
   const openModal = (item) => {
     setSelectedItem(item);
     setShowModal(true);
@@ -100,22 +92,36 @@ const KelolaLaporan = () => {
 
   const handleStatusChange = async (id, status, komentar) => {
     try {
-      // Check if the new comment is different from the current one
       const currentItem = riwayatData.find(item => item.riwayat_id === id);
       if (currentItem && currentItem.komentar === komentar && currentItem.status === status) {
-        return; // No changes, don't update
+        return;
       }
   
       await updateStatusRiwayat(id, { status, komentar });
   
-      setRiwayatData(prev =>
-        prev.map(item =>
-          item.riwayat_id === id ? { ...item, status, komentar } : item
-        )
-      );
-  
-      if (selectedItem?.riwayat_id === id) {
-        setSelectedItem(prev => ({ ...prev, status, komentar }));
+      // Jika status diubah menjadi selesai/ditolak, hapus dari daftar
+      if (status === "selesai" || status === "ditolak") {
+        setRiwayatData(prev => prev.filter(item => item.riwayat_id !== id));
+        
+        // Hapus komentar dari state
+        setCommentValue(prev => {
+          const newValues = { ...prev };
+          delete newValues[id];
+          return newValues;
+        });
+      } else {
+        // Untuk status lainnya, update biasa
+        setRiwayatData(prev =>
+          prev.map(item =>
+            item.riwayat_id === id ? { ...item, status, komentar } : item
+          )
+        );
+        
+        // Update komentar di state
+        setCommentValue(prev => ({
+          ...prev,
+          [id]: komentar
+        }));
       }
   
       MySwal.fire({
@@ -128,8 +134,7 @@ const KelolaLaporan = () => {
         buttonsStyling: false,
       });
 
-      setActiveCommentField(null); // Close the comment field after submit
-
+      setActiveCommentField(null);
     } catch (err) {
       console.error("Error updating:", err);
       MySwal.fire({
@@ -179,8 +184,6 @@ const KelolaLaporan = () => {
     setActiveCommentField(null);
   };
 
-  
-
   const confirmStatusChange = (id, status, currentComment) => {
     const statusLabel = status === "selesai" ? "Selesai" : "Ditolak";
     const confirmButtonColor = status === "selesai" ? "success" : "danger";
@@ -205,8 +208,6 @@ const KelolaLaporan = () => {
   };
 
   const confirmDelete = (id) => {
-    setIdToDelete(id);
-
     MySwal.fire({
       title: "Konfirmasi Hapus",
       text: "Yakin nih mau dihapus datanya?",
@@ -219,52 +220,37 @@ const KelolaLaporan = () => {
         cancelButton: "btn btn-secondary",
       },
       buttonsStyling: false,
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        handleDeleteConfirmed();
+        try {
+          await deleteRiwayat(id);
+          setRiwayatData(prev => prev.filter(it => it.riwayat_id !== id));
+          
+          await MySwal.fire({
+            title: "Berhasil!",
+            text: "Data berhasil dihapus.",
+            icon: "success",
+            customClass: {
+              confirmButton: "btn btn-success",
+            },
+            buttonsStyling: false,
+          });
+        } catch (err) {
+          console.error(err);
+          await MySwal.fire({
+            title: "Gagal!",
+            text: "Gagal menghapus data.",
+            icon: "error",
+            customClass: {
+              confirmButton: "btn btn-danger",
+            },
+            buttonsStyling: false,
+          });
+        }
       }
     });
   };
 
-  const handleDeleteConfirmed = async () => {
-    try {
-      await deleteRiwayat(idToDelete);
-
-      // Show success notification
-      await MySwal.fire({
-        title: "Berhasil!",
-        text: "Data berhasil dihapus.",
-        icon: "success",
-        customClass: {
-          confirmButton: "btn btn-success",
-        },
-        buttonsStyling: false,
-      });
-
-      // Update state to remove the deleted item
-      setRiwayatData((prev) =>
-        prev.filter((it) => it.riwayat_id !== idToDelete)
-      );
-    } catch (err) {
-      console.error(err);
-
-      // Show error notification
-      await MySwal.fire({
-        title: "Gagal!",
-        text: "Gagal menghapus data.",
-        icon: "error",
-        customClass: {
-          confirmButton: "btn btn-danger",
-        },
-        buttonsStyling: false,
-      });
-    } finally {
-      setShowDeleteModal(false);
-      setIdToDelete(null);
-    }
-  };
-
-  /* -------------------------- filter & paging --------------------------- */
   const filtered = riwayatData.filter((it) =>
     [
       it.judul,
@@ -284,8 +270,6 @@ const KelolaLaporan = () => {
   const currentItems = filtered.slice(indexOfLast - itemsPerPage, indexOfLast);
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-  /* -------------------------- render ----------------------------------- */
-  // Loading state
   if (loading) {
     return (
       <div className="container-fluid">
@@ -320,53 +304,45 @@ const KelolaLaporan = () => {
     );
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*  Halaman utama (potongan render)                                            */
-  /* -------------------------------------------------------------------------- */
-
-  const totalAll = riwayatData.length; // keseluruhan
-  const totalFiltered = filtered.length; // setelah disaring search
+  const totalAll = riwayatData.length;
+  const totalFiltered = filtered.length;
 
   return (
     <div className="container-fluid">
       <div className="row">
         <Sidebar />
 
-        {/* ----------------------------- MAIN -------------------------------- */}
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-          {/* ======= Header besar (tetap) ======= */}
-          <div className="d-flex align-items-center gap-2 border-bottom mb-4">
-            <i className="bi bi-clock-fill fs-3" />
-            <h1 className="h2 mb-0">Kelola Riwayat Laporan &amp; Surat</h1>
+          <div className="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom">
+            <h1 className="h2"><i className="bi bi-clipboard-data-fill me-2"></i>Kelola Laporan &amp; Surat</h1>
           </div>
 
-          {/* ======= Kotak Cari + Total ======= */}
-          <div className="card shadow-sm mb-3">
-            <div className="card-body py-3">
-              <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                {/* Search input */}
-                <div className="flex-grow-1">
-                  <Form.Control
-                    type="search"
-                    placeholder="Cari laporan, status, tanggal…"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-
-                {/* Kotak total */}
-                <div className="d-flex align-items-center bg-primary text-white rounded px-3 py-2 shadow-sm">
-                  <ClipboardData className="me-2" />
-                  <span className="fw-semibold">
-                    Total:&nbsp;{totalFiltered}&nbsp;dari&nbsp;{totalAll}
-                    &nbsp;laporan masuk
-                  </span>
-                </div>
+          <div className="row mb-4">
+            <div className="col-md-6">
+              <div className="input-group">
+                <span className="input-group-text"><i className="bi bi-search"></i></span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Cari laporan, status, atau kategori…"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button className="btn btn-outline-secondary" onClick={() => setSearchTerm('')}>
+                    <i className="bi bi-x"></i>
+                  </button>
+                )}
               </div>
+            </div>
+            <div className="col-md-6 text-end">
+              <span className="badge bg-primary fs-6 me-2">
+                <i className="bi bi-clipboard-data me-1"></i> Total: {totalFiltered}
+              </span>
+              <span className="text-muted small">dari {totalAll} laporan & surat</span>
             </div>
           </div>
 
-          {/* ======= Tabel ======= */}
           <div className="card shadow-sm">
             <div className="card-body table-responsive rounded px-3 py-2">
               <Table hover>
@@ -386,7 +362,6 @@ const KelolaLaporan = () => {
                     currentItems.map((it) => (
                       <tr key={it.riwayat_id}>
                         <td>{formatTanggal(it.created_at)}</td>
-
                         <td>
                           <Badge
                             bg={it.jenis === "laporan" ? "info" : "success"}
@@ -394,7 +369,6 @@ const KelolaLaporan = () => {
                             {it.jenis.toUpperCase()}
                           </Badge>
                         </td>
-
                         <td>{it.judul}</td>
                         <td>{getStatusBadge(it.status)}</td>
 
@@ -495,7 +469,6 @@ const KelolaLaporan = () => {
                 </tbody>
               </Table>
 
-              {/* ======= Pagination ======= */}
               {totalPages > 1 && (
                 <nav className="d-flex justify-content-center">
                   <ul className="pagination mb-0">
@@ -524,7 +497,6 @@ const KelolaLaporan = () => {
         </main>
       </div>
 
-      {/* -- Modal detail -- */}
       <ModalDetailRiwayat
         show={showModal}
         item={selectedItem}
