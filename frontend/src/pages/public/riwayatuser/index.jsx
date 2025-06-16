@@ -175,7 +175,7 @@ export default function RiwayatUser() {
                 <Header />
                 <Container className="my-5 text-center">
                     <Spinner animation="border" role="status" className="me-2" />
-                    <span>Memuat data riwayat laporan...</span>
+                    
                 </Container>
                 <Footer />
             </>

@@ -69,7 +69,7 @@ export default function ModalDetailLaporan({ show, handleClose, selectedReport }
                                 marginTop: "4px",
                                 fontFamily: "monospace"
                             }}>
-                                #{selectedReport.riwayat_id}
+                                {selectedReport.jenis === 'laporan' ? 'RPT' : 'LTR'}-{selectedReport.riwayat_id}
                             </div>
                         </div>
                     </div>

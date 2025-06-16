@@ -12,39 +12,89 @@ export default function FormLapor() {
     return (
         <>
             <Header />
-            <div className="container">
-                <main>
-                    <div className="py-5 text-center">
-                        <h2 className="mb-4">Laporkan Aspirasi dan Keluhan Anda</h2>
-                        <p className="lead mb-4">
-                            Hubungkan laporan Anda langsung ke pihak kelurahan atau desa secara cepat dan efisien.
-                        </p>
-                    </div>
-                    <div className="container col-xxl-8 px-4 py-5 shadow rounded-4 col-md-7 col-lg-8">
-                        <h5 className="mb-3">Pilih jenis laporan yang ingin disampaikan</h5>
 
-                        {/* Toggle Button */}
-                        <div className="d-flex justify-content-between gap-3 mb-4">
-                            <button
-                                type="button"
-                                className={`btn flex-fill ${formType === "laporan" ? "btn-primary" : "btn-outline-dark"}`}
-                                onClick={() => setFormType("laporan")}
-                            >
-                                Laporan
-                            </button>
-                            <button
-                                type="button"
-                                className={`btn flex-fill ${formType === "surat" ? "btn-primary" : "btn-outline-dark"}`}
-                                onClick={() => setFormType("surat")}
-                            >
-                                Surat
-                            </button>
+            <div className="position-relative overflow-hidden">
+
+                {/* Atur bagian background banner disini */}
+                <div
+                    className="position-absolute w-100"
+                    style={{
+                        background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)",
+                        height: "70vh",
+                        zIndex: -1
+                    }}
+                >
+                    <svg
+                        className="position-absolute bottom-0 w-100"
+                        viewBox="0 0 1200 120"
+                        preserveAspectRatio="none"
+                        style={{ height: "120px" }}
+                    >
+                        <path
+                            d="M0,60 C300,120 600,0 900,60 C1050,90 1150,30 1200,60 L1200,120 L0,120 Z"
+                            fill="rgba(255,255,255,0.1)"
+                        />
+                    </svg>
+
+                    <svg
+                        className="position-absolute bottom-0 w-100"
+                        viewBox="0 0 1200 120"
+                        preserveAspectRatio="none"
+                        style={{ height: "100px", transform: "translateY(10px)" }}
+                    >
+                        <path
+                            d="M0,40 C400,100 800,20 1200,80 L1200,120 L0,120 Z"
+                            fill="rgba(255,255,255,0.05)"
+                        />
+                    </svg>
+                </div>
+
+                <div className="container position-relative">
+                    <main>
+                        <div className="py-5 text-center text-white">
+                            <h2 className="mb-4 fw-bold">Laporkan Aspirasi dan Keluhan Anda</h2>
+                            <p className="lead mb-4 opacity-90">
+                                Hubungkan laporan Anda langsung ke pihak kelurahan atau desa secara cepat dan efisien.
+                            </p>
                         </div>
+                        <div
+                            className="container col-xxl-8 px-4 py-5 col-md-7 col-lg-8 mb-5"
+                            style={{
+                                background: "rgba(255, 255, 255, 0.95)",
+                                backdropFilter: "blur(10px)",
+                                borderRadius: "20px",
+                                boxShadow: "0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2)"
+                            }}
+                        >
+                            <h5 className="mb-3 text-dark">Pilih jenis laporan yang ingin disampaikan</h5>
 
-                        {/* Conditional Rendering */}
-                        {formType === "laporan" ? <FormLaporan navigate={navigate} /> : <FormSurat navigate={navigate} />}
-                    </div>
-                </main>
+                            {/* Toggle Button */}
+                            <div className="d-flex justify-content-between gap-3 mb-4">
+                                <button
+                                    type="button"
+                                    className={`btn flex-fill ${formType === "laporan" ? "btn-primary" : "btn-outline-dark"}`}
+                                    onClick={() => setFormType("laporan")}
+                                >
+                                    Laporan
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`btn flex-fill ${formType === "surat" ? "btn-primary" : "btn-outline-dark"}`}
+                                    onClick={() => setFormType("surat")}
+                                >
+                                    Surat
+                                </button>
+                            </div>
+
+                            {/* Conditional Rendering */}
+                            {formType === "laporan" ? (
+                                <FormLaporan navigate={navigate} />
+                            ) : (
+                                <FormSurat navigate={navigate} />
+                            )}
+                        </div>
+                    </main>
+                </div>
             </div>
             <Footer />
         </>
@@ -249,5 +299,3 @@ function FormSurat({ navigate }) {
         </>
     );
 }
-
-// Main component

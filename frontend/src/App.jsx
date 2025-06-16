@@ -14,7 +14,7 @@ import Profil from "./shared/profil";
 function App() {
   return (
     <>
-      <div className="container">
+      <div className="">
         <BrowserRouter>
           <Routes>
             
