@@ -10,15 +10,15 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     const result = await MySwal.fire({
-        title: 'Konfirmasi Logout',
-        text: 'Apakah Anda yakin ingin logout?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, logout',
-        cancelButtonText: 'Batal',
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-secondary'
+      title: 'Konfirmasi Logout',
+      text: 'Apakah Anda yakin ingin logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, logout',
+      cancelButtonText: 'Batal',
+      customClass: {
+        confirmButton: 'btn btn-danger me-2',
+        cancelButton: 'btn btn-secondary'
       },
       buttonsStyling: false
     });
@@ -29,24 +29,32 @@ export default function Sidebar() {
     localStorage.removeItem('token');
 
     await MySwal.fire({
-        title: 'Sampai jumpa!',
-        text: 'Anda berhasil logout.',
-        icon: 'success',
-        customClass: {
+      title: 'Sampai jumpa!',
+      text: 'Anda berhasil logout.',
+      icon: 'success',
+      customClass: {
         confirmButton: 'btn btn-success'
       },
       buttonsStyling: false
     });
 
     navigate('/login');
-};
+  };
 
   return (
     <nav
       className="col-md-3 col-lg-2 d-md-block bg-dark text-white sidebar"
-      style={{ minWidth: "auto" }}
+      style={{
+        minWidth: "auto",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: "100vh",
+        overflowY: "auto",
+        zIndex: 1000
+      }}
     >
-      <div className="position-sticky pt-3 vh-100">
+      <div className="pt-3 vh-100">
         <div className="sidebar-header px-3 py-4 border-bottom">
           <Link
             to="/dashboard"

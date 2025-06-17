@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useFormSubmission } from './hooks/useFormSubmission';
-import Footer from "../../../shared/footer";
-import Header from "../../../shared/header";
 import ModalSukses from '../../../components/modalsukses';
 
 export default function FormLapor() {
@@ -11,8 +9,6 @@ export default function FormLapor() {
 
     return (
         <>
-            <Header />
-
             <div className="position-relative overflow-hidden">
 
                 {/* Atur bagian background banner disini */}
@@ -96,7 +92,6 @@ export default function FormLapor() {
                     </main>
                 </div>
             </div>
-            <Footer />
         </>
     );
 }
@@ -188,7 +183,7 @@ function FormLaporan({ navigate }) {
                     <button
                         className="col-4 btn btn-outline-dark btn-lg w-50"
                         type="button"
-                        onClick={() => navigate("/riwayat-user")}
+                        onClick={() => navigate("/riwayat")}
                     >
                         Lihat Riwayat Laporan
                     </button>

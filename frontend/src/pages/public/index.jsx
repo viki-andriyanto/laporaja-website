@@ -1,14 +1,9 @@
-import Footer from "../../shared/footer";
-import Header from "../../shared/header";
-
 export default function LandingPage() {
     return (
         <>
-            <Header />
-
             {/* Hero Section */}
             <header className="bg-primary text-white text-center py-5" style={{
-                background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)"
+                background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #0dcaf0 100%)",
             }}>
                 <div className="container">
                     <h1 className="display-6 fw-bold">
@@ -168,8 +163,6 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
-
-            <Footer />
         </>
     );
 }

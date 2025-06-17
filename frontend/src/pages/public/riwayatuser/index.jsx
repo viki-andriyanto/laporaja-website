@@ -172,20 +172,15 @@ export default function RiwayatUser() {
     if (loading) {
         return (
             <>
-                <Header />
                 <Container className="my-5 text-center">
                     <Spinner animation="border" role="status" className="me-2" />
-                    
                 </Container>
-                <Footer />
             </>
         );
     }
 
     return (
         <>
-            <Header />
-
             <Container className="my-5">
                 {error && (
                     <Alert variant="danger" className="mb-4">
@@ -388,8 +383,6 @@ export default function RiwayatUser() {
                 handleClose={handleCloseModal}
                 selectedReport={selectedReport}
             />
-
-            <Footer />
         </>
     );
 }
