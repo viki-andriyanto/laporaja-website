@@ -1,7 +1,8 @@
-
 import { Modal, Button, Badge } from "react-bootstrap";
+import { useNavigate } from "react-router";
 
 export default function ModalDetailLaporan({ show, handleClose, selectedReport }) {
+    const navigate = useNavigate();
     const statusLabels = {
         "perlu ditinjau": "Perlu Ditinjau",
         "dalam proses": "Dalam Proses",
@@ -41,6 +42,17 @@ export default function ModalDetailLaporan({ show, handleClose, selectedReport }
             return report.laporan.kategori.nama_kategori;
         }
         return report.jenis === 'surat' ? 'Surat' : 'Umum';
+    };
+
+    const handleEdit = () => {
+        handleClose();
+        // Navigate to edit page with the report data
+        navigate(`/Lapor/edit/${selectedReport.riwayat_id}`, {
+            state: {
+                reportData: selectedReport,
+                isEdit: true
+            }
+        });
     };
 
     return (
@@ -222,7 +234,6 @@ export default function ModalDetailLaporan({ show, handleClose, selectedReport }
                     </div>
                 )}
 
-
             </Modal.Body>
             <Modal.Footer style={{
                 background: "#f8f9fa",
@@ -242,6 +253,22 @@ export default function ModalDetailLaporan({ show, handleClose, selectedReport }
                 >
                     Tutup
                 </Button>
+                {/* Edit button */}
+                {selectedReport.status === "perlu ditinjau" || selectedReport.status === "ditolak" ? (
+                    <Button
+                        variant="primary"
+                        onClick={handleEdit}
+                        style={{
+                            background: "linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)",
+                            border: "none",
+                            padding: "10px 24px",
+                            borderRadius: "6px",
+                            fontWeight: "500"
+                        }}
+                    >
+                        <i className="fa-solid fa-pen-to-square me-2"></i> Edit
+                    </Button>
+                ) : null}
             </Modal.Footer>
         </Modal>
     );

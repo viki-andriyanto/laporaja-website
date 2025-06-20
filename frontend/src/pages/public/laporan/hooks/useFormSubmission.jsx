@@ -88,7 +88,6 @@ export const useFormSubmission = () => {
             if (formData.file) riwayatFormData.append("file", formData.file);
             if (formData.kontak) riwayatFormData.append("kontak", formData.kontak);
             
-
             const riwayatResponse = await createRiwayat(riwayatFormData);
 
             if (!riwayatResponse.success) {
