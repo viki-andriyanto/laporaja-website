@@ -57,7 +57,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         // Kategori management (admin only)
         Route::post('/kategori', [KategoriController::class, 'store']);
-        Route::post('/kategori/{kategori}', [KategoriController::class, 'update']);
+        Route::put('/kategori/{id}', [KategoriController::class, 'update']);
         Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy']);
 
         // Laporan management (admin only)

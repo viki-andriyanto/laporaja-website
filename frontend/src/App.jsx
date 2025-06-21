@@ -11,6 +11,7 @@ import Login from "./pages/_auth/login";
 import Register from "./pages/_auth/register";
 import Profil from "./shared/profil";
 import PublicLayout from "./layouts/public";
+import KategoriAdmin from "./pages/Admin/kategori";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/riwayat-admin" element={<RiwayatAdmin />} />
             <Route path="/pengguna" element={<Pengguna />} />
             <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/kategori" element={<KategoriAdmin />} />
           </Routes>
         </BrowserRouter>
       </div>

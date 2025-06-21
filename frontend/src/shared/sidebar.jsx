@@ -80,6 +80,11 @@ export default function Sidebar() {
             </NavLink>
           </li>
           <li className="nav-item">
+            <NavLink className="nav-link text-white" to="/kategori">
+              <i className="bi bi-tags me-2" /> Kelola Kategori
+            </NavLink>
+          </li>
+          <li className="nav-item">
             <NavLink className="nav-link text-white" to="/kelola-laporan">
               <i className="bi bi-inbox me-2" /> Kelola Laporan
             </NavLink>
