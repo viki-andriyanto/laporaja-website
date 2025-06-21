@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create users table
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('nik', 16)->unique();
@@ -25,12 +26,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        // Create password_reset_tokens table with expires_at
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('nik')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
+            $table->timestamp('expires_at')->nullable(); // Langsung ditambahkan di sini
         });
 
+        // Create sessions table
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -46,8 +50,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

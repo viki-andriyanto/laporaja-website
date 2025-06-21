@@ -188,6 +188,12 @@ export default function Login() {
               )}
             </div>
 
+            <div style={{ textAlign: 'right', marginBottom: '15px' }}>
+              <Link to="/forgot-password" style={forgotPasswordStyle}>
+                Lupa Password?
+              </Link>
+            </div>
+
             <button 
               type="submit" 
               style={{
@@ -203,7 +209,7 @@ export default function Login() {
 
           <div style={{ textAlign: 'center', marginTop: 10 }}>
             <hr style={{ margin: '20px 0' }} />
-            <p>
+            <p style={{ fontSize: '14px', color: '#555' }}>
               Apakah kamu tidak memiliki akun?{' '}
               <Link to="/register" style={linkStyle}>Buat akun</Link>
             </p>
@@ -212,8 +218,6 @@ export default function Login() {
       </div>
   );
 }
-
-// ... (keep the same style constants at the bottom)
 
 const inputStyle = {
   width: '100%',
@@ -237,4 +241,13 @@ const buttonStyle = {
 const linkStyle = {
   color: '#4285F4',
   textDecoration: 'underline'
+};
+
+const forgotPasswordStyle = {
+  color: '#666',
+  fontSize: '13px',
+  textDecoration: 'none',
+  ':hover': {
+    textDecoration: 'underline'
+  }
 };

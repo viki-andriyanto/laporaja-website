@@ -38,6 +38,11 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'reset_password_token'
+    ];
+
+    protected $casts = [
+        'reset_password_token_expires_at' => 'datetime'
     ];
 
     /**

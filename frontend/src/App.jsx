@@ -9,6 +9,7 @@ import RiwayatUser from "./pages/public/riwayatuser/index";
 // Import Auth Components
 import Login from "./pages/_auth/login";
 import Register from "./pages/_auth/register";
+import ForgotPassword from "./pages/_auth/forgotpassword";
 import Profil from "./shared/profil";
 import PublicLayout from "./layouts/public";
 import KategoriAdmin from "./pages/Admin/kategori";
@@ -27,6 +28,7 @@ function App() {
 
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="profil" element={<Profil />} />
             
             <Route path="/kelola-laporan" element={<KelolaLaporan />} />

@@ -19,31 +19,15 @@ class KategoriSeeder extends Seeder
                 'users_user_id' => 1
             ],
             [
+                'nama_kategori' => 'Kebersihan',
+                'users_user_id' => 1
+            ],
+            [
                 'nama_kategori' => 'Keamanan',
                 'users_user_id' => 1
             ],
             [
-                'nama_kategori' => 'Lingkungan',
-                'users_user_id' => 1
-            ],
-            [
-                'nama_kategori' => 'Kesehatan',
-                'users_user_id' => 1
-            ],
-            [
-                'nama_kategori' => 'Pendidikan',
-                'users_user_id' => 1
-            ],
-            [
-                'nama_kategori' => 'Sosial',
-                'users_user_id' => 1
-            ],
-            [
-                'nama_kategori' => 'Ekonomi',
-                'users_user_id' => 1
-            ],
-            [
-                'nama_kategori' => 'Lainnya',
+                'nama_kategori' => 'Administrasi',
                 'users_user_id' => 1
             ],
         ];

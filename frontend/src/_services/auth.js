@@ -55,7 +55,25 @@ export const getCurrentUser = async () => {
   }
 };
 
+export const requestResetToken = async (nik) => {
+  try {
+    const response = await API.post("/forgot-password", { nik });
+    return response.data;
+  } catch (error) {
+    console.error("Gagal meminta token reset:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
+export const resetPassword = async (data) => {
+  try {
+    const response = await API.post("/reset-password", data);
+    return response.data;
+  } catch (error) {
+    console.error("Gagal reset password:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
 export const useDecodeToken = (token) => {
   const { decodeToken, isExpired } = useJwt(token);

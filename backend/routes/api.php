@@ -6,6 +6,7 @@ use App\Http\Controllers\SuratController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\RiwayatLaporanController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ForgotPasswordController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,9 @@ Route::get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetToken']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::middleware(['auth:api'])->group(function () {
     // Routes untuk semua authenticated user
