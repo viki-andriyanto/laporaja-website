@@ -13,6 +13,11 @@ import Sidebar from "../../shared/sidebar";
 import { getAllRiwayat } from "../../_services/riwayat-laporan";
 import { isValid, parseISO, format } from "date-fns";
 import ModalDetailRiwayat from "../../shared/ModalDetailRiwayat";
+import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 // Register Chart.js components
 ChartJS.register(
@@ -30,12 +35,31 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const openModal = (item) => {
     setSelectedItem(item);
     setShowModal(true);
   };
-
+  
+    // Tambahkan useEffect untuk pengecekan role
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user || user.role !== 'admin') {
+      // Jika bukan admin, redirect ke halaman utama
+      navigate('/');
+      // Optional: Tampilkan pesan error
+      MySwal.fire({
+        title: 'Akses Ditolak',
+        text: 'Anda tidak memiliki izin untuk mengakses halaman ini',
+        icon: 'error',
+        customClass: {
+          confirmButton: "btn btn-success",
+        },
+      });
+    }
+  }, [navigate]);
 
   // Fetch data dari database
   useEffect(() => {
