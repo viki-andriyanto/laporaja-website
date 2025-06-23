@@ -36,22 +36,22 @@ class LaporanSeeder extends Seeder
             [
                 'lokasi_kejadian' => 'Jl. Parangtritis No. 67, Bantul',
                 'tanggal_kejadian' => '2024-05-15 11:30:00',
-                'kategori_kategori_id' => 5
+                'kategori_kategori_id' => 1
             ],
             [
                 'lokasi_kejadian' => 'Jl. Wates KM 12, Kulonprogo',
                 'tanggal_kejadian' => '2024-06-20 13:45:00',
-                'kategori_kategori_id' => 6
+                'kategori_kategori_id' => 2
             ],
             [
                 'lokasi_kejadian' => 'Jl. Wonosari No. 34, Gunungkidul',
                 'tanggal_kejadian' => '2024-07-10 16:20:00',
-                'kategori_kategori_id' => 7
+                'kategori_kategori_id' => 3
             ],
             [
                 'lokasi_kejadian' => 'Alun-alun Kidul, Yogyakarta',
                 'tanggal_kejadian' => '2024-08-05 10:15:00',
-                'kategori_kategori_id' => 8
+                'kategori_kategori_id' => 4
             ],
         ];
 
