@@ -64,7 +64,6 @@ export default function FormLapor() {
                         >
                             <h5 className="mb-3 text-dark">Pilih jenis laporan yang ingin disampaikan</h5>
 
-                            {/* Toggle Button */}
                             <div className="d-flex justify-content-between gap-3 mb-4">
                                 <button
                                     type="button"
@@ -82,7 +81,6 @@ export default function FormLapor() {
                                 </button>
                             </div>
 
-                            {/* Conditional Rendering */}
                             {formType === "laporan" ? (
                                 <FormLaporan navigate={navigate} />
                             ) : (
@@ -124,9 +122,11 @@ function FormLaporan({ navigate }) {
         if (result.success) {
             setShowModal(true);
             e.target.reset();
+            window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
             alert("Terjadi kesalahan saat mengirim laporan: " + result.error);
         }
+        
     };
 
     return (
@@ -194,7 +194,7 @@ function FormLaporan({ navigate }) {
                 show={showModal}
                 onClose={() => setShowModal(false)}
                 message="Laporan Anda berhasil dikirim!"
-                onNavigate={() => navigate("/riwayat-user")}
+                onNavigate={() => navigate("/riwayat")}
             />
         </>
     );
@@ -226,6 +226,7 @@ function FormSurat({ navigate }) {
         if (result.success) {
             setShowModal(true);
             e.target.reset();
+            window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
             alert("Terjadi kesalahan saat mengirim surat: " + result.error);
         }
@@ -278,7 +279,7 @@ function FormSurat({ navigate }) {
                     <button
                         className="col-4 btn btn-outline-dark btn-lg w-50"
                         type="button"
-                        onClick={() => navigate("/riwayat-user")}
+                        onClick={() => navigate("/riwayat")}
                     >
                         Lihat Riwayat Surat
                     </button>
@@ -289,7 +290,7 @@ function FormSurat({ navigate }) {
                 show={showModal}
                 onClose={() => setShowModal(false)}
                 message="Surat Anda berhasil dikirim!"
-                onNavigate={() => navigate("/riwayat-user")}
+                onNavigate={() => navigate("/riwayat")}
             />
         </>
     );
