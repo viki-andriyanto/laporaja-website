@@ -109,40 +109,53 @@ class RiwayatLaporanController extends Controller
     }
 
     // Update riwayat laporan (untuk user biasa)
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,csv|max:20480',
-            'kontak' => 'nullable|string',
-        ]);
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'judul' => 'required|string|max:255',
+        'deskripsi' => 'required|string',
+        'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,csv|max:20480',
+        'kontak' => 'nullable|string',
+    ]);
 
-        // Hanya user pemilik data yang bisa update
-        $riwayat = RiwayatLaporan::where('users_user_id', auth('api')->id())
-            ->find($id);
+    // Perbaiki query: pastikan riwayat milik user yang login
+    $riwayat = RiwayatLaporan::where('users_user_id', auth('api')->id())
+        ->where('riwayat_id', $id) // Gunakan riwayat_id
+        ->first();
 
-        if (!$riwayat) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Riwayat laporan tidak ditemukan atau Anda tidak memiliki akses'
-            ], 404);
+    if (!$riwayat) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Riwayat laporan tidak ditemukan atau Anda tidak memiliki akses'
+        ], 404);
+    }
+
+    $data = $request->except(['status', 'komentar', 'file']);
+
+    // Handle file upload
+    if ($request->hasFile('file')) {
+        // Hapus file lama jika ada
+        if ($riwayat->file && Storage::disk('public')->exists($riwayat->file)) {
+            Storage::disk('public')->delete($riwayat->file);
         }
 
-        // Hapus status dan komentar dari request jika ada
-        $data = $request->except(['status', 'komentar']);
-
-        $riwayat->update($data);
-
-        // Transform data untuk response
-        $responseData = $this->transformRiwayatData($riwayat);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Riwayat laporan berhasil diperbarui',
-            'data' => $responseData
-        ]);
+        // Upload file baru
+        $uploadedFile = $request->file('file');
+        $filename = time() . '_' . $uploadedFile->getClientOriginalName();
+        $path = $uploadedFile->storeAs('uploads/riwayat', $filename, 'public');
+        $data['file'] = $path;
     }
+
+    $riwayat->update($data);
+
+    $responseData = $this->transformRiwayatData($riwayat->fresh()); // Load data terbaru
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Riwayat laporan berhasil diperbarui',
+        'data' => $responseData
+    ]);
+}
 
     // Update status riwayat laporan (khusus admin)
     public function updateStatus(Request $request, $id)

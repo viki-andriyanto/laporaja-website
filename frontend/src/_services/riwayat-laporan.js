@@ -42,14 +42,24 @@ export const createRiwayat = async (data) => {
   }
 };
 
-
-export const updateRiwayat = async (id, data) => {
+export const updateRiwayat = async (id, formData) => {
   try {
-    const response = await API.post(`/riwayat-laporan/${id}`, data);
-    return response.data.data;
+    const response = await API.post(`/riwayat-laporan/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data; // Kembalikan seluruh response
   } catch (error) {
     console.error("Gagal memperbarui riwayat laporan:", error);
-    throw error;
+
+    // Berikan error message yang lebih informatif
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Terjadi kesalahan saat memperbarui riwayat";
+
+    throw new Error(errorMessage);
   }
 };
 
@@ -59,7 +69,7 @@ export const updateStatusRiwayat = async (id, data) => {
     // Send as a single object with status and komentar properties
     const response = await API.post(`/riwayat-laporan/${id}/status`, {
       status: data.status,
-      komentar: data.komentar
+      komentar: data.komentar,
     });
     return response.data.data;
   } catch (error) {

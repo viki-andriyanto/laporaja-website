@@ -254,7 +254,7 @@ export default function ModalDetailLaporan({ show, handleClose, selectedReport }
                     Tutup
                 </Button>
                 {/* Edit button */}
-                {selectedReport.status === "perlu ditinjau" || selectedReport.status === "ditolak" ? (
+                {selectedReport.status === "perlu ditinjau" ? (
                     <Button
                         variant="primary"
                         onClick={handleEdit}
