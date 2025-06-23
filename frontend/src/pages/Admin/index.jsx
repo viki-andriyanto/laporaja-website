@@ -13,6 +13,8 @@ import Sidebar from "../../shared/sidebar";
 import { getAllRiwayat } from "../../_services/riwayat-laporan";
 import { isValid, parseISO, format } from "date-fns";
 import ModalDetailRiwayat from "../../shared/ModalDetailRiwayat";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../../_services/auth";
 
 // Register Chart.js components
 ChartJS.register(
@@ -27,15 +29,35 @@ ChartJS.register(
 const AdminDashboard = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true); // Separate loading state for auth check
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const openModal = (item) => {
     setSelectedItem(item);
     setShowModal(true);
   };
 
+    // Check user role on component mount
+    useEffect(() => {
+      const checkAdminAccess = async () => {
+        try {
+          const user = await getCurrentUser();
+          if (!user || user.role !== 'admin') {
+            navigate('/'); // Redirect to home if not admin
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+          navigate('/');
+        } finally {
+          setAuthLoading(false);
+        }
+      };
+  
+      checkAdminAccess();
+    }, [navigate]);
 
   // Fetch data dari database
   useEffect(() => {
@@ -63,7 +85,7 @@ const AdminDashboard = () => {
   }, []);
 
   // Loading state
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="container-fluid">
         <div className="row">
