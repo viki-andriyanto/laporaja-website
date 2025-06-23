@@ -22,7 +22,7 @@ export const getSuratById = async (id) => {
 
 export const updateSurat = async (id, data) => {
     try {
-        const response = await API.put(`/surat/${id}`, data);
+        const response = await API.post(`/surat/${id}`, data);
         return response.data;
     } catch (error) {
         console.error("Gagal memperbarui surat:", error);

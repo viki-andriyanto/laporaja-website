@@ -57,6 +57,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/surat/{surat}', [SuratController::class, 'destroy']);
     Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy']);
 
+    Route::post('/laporan/{laporan}', [LaporanController::class, 'update']);
+    Route::post('/surat/{surat}', [SuratController::class, 'update']);
+    Route::post('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'update']);
+
     // Routes dengan middleware tambahan untuk admin
     Route::middleware('role:admin')->group(function () {
         // Kategori management (admin only)
@@ -65,14 +69,6 @@ Route::middleware(['auth:api'])->group(function () {
         Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy']);
 
         // Laporan management (admin only)
-        Route::post('/laporan/{laporan}', [LaporanController::class, 'update']);
-
-        // Surat management (admin only)
-        Route::post('/surat/{surat}', [SuratController::class, 'update']);
-
-
-        // Riwayat Laporan management (admin only)
-        Route::post('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'update']);
         Route::post('/riwayat-laporan/{id}/status', [RiwayatLaporanController::class, 'updateStatus']); // Route khusus update status
         Route::delete('/riwayat-laporan/{id}', [RiwayatLaporanController::class, 'destroy']);
 

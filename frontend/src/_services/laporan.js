@@ -22,7 +22,7 @@ export const getLaporanById = async (id) => {
 
 export const updateLaporan = async (id, data) => {
     try {
-        const response = await API.put(`/laporan/${id}`, data);
+        const response = await API.post(`/laporan/${id}`, data);
         return response.data;
     } catch (error) {
         console.error("Gagal memperbarui laporan:", error);

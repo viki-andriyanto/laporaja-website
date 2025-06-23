@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/_auth/forgotpassword";
 import Profil from "./shared/profil";
 import PublicLayout from "./layouts/public";
 import KategoriAdmin from "./pages/Admin/kategori";
+import EditForm from "./pages/public/laporan/edit";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route index element={<LandingPage />} />
               <Route path="/lapor" element={<FormLapor />} />
               <Route path="/riwayat" element={<RiwayatUser />} />
+              <Route path="/lapor/edit/:id" element={<EditForm />} />
             </Route>
 
             <Route path="login" element={<Login />} />

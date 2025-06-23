@@ -45,7 +45,7 @@ export const createRiwayat = async (data) => {
 
 export const updateRiwayat = async (id, data) => {
   try {
-    const response = await API.put(`/riwayat-laporan/${id}`, data);
+    const response = await API.post(`/riwayat-laporan/${id}`, data);
     return response.data.data;
   } catch (error) {
     console.error("Gagal memperbarui riwayat laporan:", error);
